@@ -1,0 +1,6 @@
+[package]
+name = "gapbuf"
+version = "0.1.0"
+authors = ["FrozenLib <frozenlib@users.noreply.github.com>"]
+
+[dependencies]
