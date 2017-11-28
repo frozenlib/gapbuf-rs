@@ -1,2 +1,2 @@
 # rust-gapbuf
-GapBuffer in Rust.
+Generic Gap Buffer implementation in Rust.

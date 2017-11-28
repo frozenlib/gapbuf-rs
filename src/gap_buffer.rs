@@ -6,26 +6,37 @@ use std::fmt::{Debug, Error, Formatter};
 use std::iter::FromIterator;
 use std::marker::PhantomData;
 
-/// Creates a GapBuffer containing the arguments.
+/// Creates a [`GapBuffer`] containing the arguments.
+///
+/// `gap_buffer!` allows [`GapBuffer`] to be defined with the same syntax as `vec!`.
+/// There are two forms of this macro:
+///
+/// - Create a [`GapBuffer`] containing a given list of elements:
 ///
 /// ```
-/// // In the crate root module:
-/// #[macro_use]
-/// extern crate gapbuf;
-///
-/// fn main() {
+/// # #[macro_use] /// extern crate gapbuf;
+/// # fn main() {
 ///   let b = gap_buffer![1, 2, 3];
 ///   assert_eq!(b.len(), 3);
 ///   assert_eq!(b[0], 1);
 ///   assert_eq!(b[1], 2);
 ///   assert_eq!(b[2], 3);
+/// # }
+/// ```
 ///
+/// - Create a [`GapBuffer`] from a given element and size:
+///
+/// ```
+/// # #[macro_use] /// extern crate gapbuf;
+/// # fn main() {
 ///   let b = gap_buffer!["abc"; 2];
 ///   assert_eq!(b.len(), 2);
 ///   assert_eq!(b[0], "abc");
 ///   assert_eq!(b[1], "abc");
-/// }
+/// # }
 /// ```
+///
+/// [`GapBuffer`]: ../gapbuf/struct.GapBuffer.html
 #[macro_export]
 macro_rules! gap_buffer {
     ($elem:expr; $n:expr) => (
@@ -53,6 +64,9 @@ pub struct GapBuffer<T> {
     gap: usize,
 }
 
+/// Dynamic array that allows efficient insertion and deletion operations clustered near the same location.
+/// 
+/// `GapBuffer` has a member similer to `Vec`.
 impl<T> GapBuffer<T> {
     /// Constructs a new, empty `GapBuffer<T>`.
     ///
@@ -96,6 +110,8 @@ impl<T> GapBuffer<T> {
             gap: 0,
         }
     }
+
+    /// Create a `GapBuffer` directly from the raw components of another `GapBuffer`.
     pub unsafe fn from_raw_parts(
         ptr: *mut T,
         length: usize,
@@ -109,12 +125,17 @@ impl<T> GapBuffer<T> {
         }
     }
 
+    /// Returns the number of elements the `GapBuffer` can hold without reallocating.
     pub fn capacity(&self) -> usize {
         self.buf.cap()
     }
+
+    /// Returns the number of elements in the `GapBuffer`.
     pub fn len(&self) -> usize {
         self.len
     }
+
+    /// Returns true if the `GapBuffer` contains no elements.
     pub fn is_empty(&self) -> bool {
         self.len == 0
     }
