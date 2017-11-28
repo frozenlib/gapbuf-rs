@@ -14,7 +14,7 @@ use std::marker::PhantomData;
 /// - Create a [`GapBuffer`] containing a given list of elements:
 ///
 /// ```
-/// # #[macro_use] /// extern crate gapbuf;
+/// # #[macro_use] extern crate gapbuf;
 /// # fn main() {
 ///   let b = gap_buffer![1, 2, 3];
 ///   assert_eq!(b.len(), 3);
@@ -27,7 +27,7 @@ use std::marker::PhantomData;
 /// - Create a [`GapBuffer`] from a given element and size:
 ///
 /// ```
-/// # #[macro_use] /// extern crate gapbuf;
+/// # #[macro_use] extern crate gapbuf;
 /// # fn main() {
 ///   let b = gap_buffer!["abc"; 2];
 ///   assert_eq!(b.len(), 2);
@@ -126,6 +126,13 @@ impl<T> GapBuffer<T> {
     }
 
     /// Returns the number of elements the `GapBuffer` can hold without reallocating.
+    /// 
+    /// # Examples
+    /// ```
+    /// # use gapbuf::GapBuffer;
+    /// let buf: GapBuffer<i32> = GapBuffer::with_capacity(10);
+    /// assert_eq!(buf.capacity(), 10);
+    /// ```
     pub fn capacity(&self) -> usize {
         self.buf.cap()
     }
@@ -140,6 +147,10 @@ impl<T> GapBuffer<T> {
         self.len == 0
     }
 
+    /// Reserves capacity for at least additional more elements to be inserted in the given `GapBuffer<T>`.
+    /// The collection may reserve more space to avoid frequent reallocations.
+    /// After calling reserve, capacity will be greater than or equal to `self.len() + additional`.
+    /// Does nothing if capacity is already sufficient.
     pub fn reserve(&mut self, additional: usize) {
         let cap_old = self.buf.cap();
         self.buf.reserve(self.len, additional);
