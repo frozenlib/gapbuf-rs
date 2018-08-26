@@ -367,7 +367,7 @@ impl<T> GapBuffer<T> {
             phantom: PhantomData,
         }
     }
-    pub fn as_mut_slice(&self) -> GapBufferSliceMut<T> {
+    pub fn as_mut_slice(&mut self) -> GapBufferSliceMut<T> {
         GapBufferSliceMut {
             ptr: self.buf.as_ptr(),
             s: self.get_slice_state(),
