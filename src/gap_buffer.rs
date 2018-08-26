@@ -1,10 +1,10 @@
 use alloc::raw_vec::RawVec;
-use std::ptr;
-use std::slice;
-use std::ops::{Index, IndexMut};
 use std::fmt::{Debug, Error, Formatter};
 use std::iter::FromIterator;
 use std::marker::PhantomData;
+use std::ops::{Index, IndexMut};
+use std::ptr;
+use std::slice;
 
 /// Creates a [`GapBuffer`] containing the arguments.
 ///
@@ -65,7 +65,7 @@ pub struct GapBuffer<T> {
 }
 
 /// Dynamic array that allows efficient insertion and deletion operations clustered near the same location.
-/// 
+///
 /// `GapBuffer` has a member similer to `Vec`.
 impl<T> GapBuffer<T> {
     /// Constructs a new, empty `GapBuffer<T>`.
@@ -126,7 +126,7 @@ impl<T> GapBuffer<T> {
     }
 
     /// Returns the number of elements the `GapBuffer` can hold without reallocating.
-    /// 
+    ///
     /// # Examples
     /// ```
     /// # use gapbuf::GapBuffer;
@@ -528,8 +528,6 @@ where
     }
 }
 
-
-
 impl<T> Debug for GapBuffer<T>
 where
     T: Debug,
@@ -549,7 +547,6 @@ impl<T> FromIterator<T> for GapBuffer<T> {
         buf
     }
 }
-
 
 pub struct GapBufferSlice<'a, T: 'a> {
     ptr: *const T,
