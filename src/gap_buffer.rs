@@ -1,5 +1,4 @@
 use crate::raw_buffer::RawBuffer;
-use std::alloc::*;
 use std::cmp::*;
 use std::fmt::{Debug, Error, Formatter};
 use std::iter::FromIterator;
@@ -287,9 +286,16 @@ impl<T> GapBuffer<T> {
         self.truncate(0);
     }
     pub fn truncate(&mut self, len: usize) {
-        while len < self.len {
-            let index = self.len - 1;
-            self.remove(index);
+        if needs_drop::<T>() {
+            while len < self.len {
+                let index = self.len - 1;
+                self.remove(index);
+            }
+        } else {
+            if len < self.len {
+                self.len = len;
+                self.gap = min(self.gap, len);
+            }
         }
     }
 
