@@ -403,9 +403,15 @@ where
 {
     /// Resize the `GapBuffer<T>` in-place so that 'len' is equal to 'new_len'.
     pub fn resize(&mut self, new_len: usize, value: T) {
-        self.truncate(new_len);
-        while self.len < new_len {
-            self.push_back(value.clone());
+        let old_len = self.len();
+        if new_len < old_len {
+            self.truncate(new_len);
+        }
+        if new_len > old_len {
+            self.reserve(new_len - old_len);
+            while self.len < new_len {
+                self.push_back(value.clone());
+            }
         }
     }
 }
