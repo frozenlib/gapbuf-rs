@@ -1,7 +1,7 @@
 #![feature(alloc)]
 #![feature(generators, generator_trait)]
 #![feature(test)]
-#![feature(raw_vec_internals)]
+#![feature(crate_in_paths)]
 
 extern crate alloc;
 
@@ -10,6 +10,7 @@ mod finally;
 
 #[macro_use]
 mod gap_buffer;
+mod raw_buffer;
 mod tests;
 
 pub use gap_buffer::GapBuffer;
