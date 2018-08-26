@@ -1,9 +1,7 @@
 #![feature(alloc)]
-#![feature(pointer_methods)]
-#![feature(conservative_impl_trait)]
 #![feature(generators, generator_trait)]
 #![feature(test)]
-
+#![feature(raw_vec_internals)]
 
 extern crate alloc;
 
