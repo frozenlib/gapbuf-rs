@@ -396,13 +396,17 @@ impl<T> GapBuffer<T> {
         IterMut { buf: self, idx: 0 }
     }
 
+    #[inline]
     fn get_offset(&self, index: usize) -> usize {
         assert!(index < self.len);
         index + if index < self.gap { 0 } else { self.gap_len() }
     }
+
+    #[inline]
     fn gap_len(&self) -> usize {
         self.buf.cap() - self.len
     }
+
     fn get_slice_state(&self) -> GapBufferSliceState {
         GapBufferSliceState {
             cap: self.buf.cap(),
@@ -456,6 +460,8 @@ where
 
 impl<T> Index<usize> for GapBuffer<T> {
     type Output = T;
+
+    #[inline]
     fn index(&self, index: usize) -> &T {
         let p = self.buf.as_ptr();
         let o = self.get_offset(index);
@@ -464,6 +470,7 @@ impl<T> Index<usize> for GapBuffer<T> {
 }
 
 impl<T> IndexMut<usize> for GapBuffer<T> {
+    #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
         let p = self.buf.as_ptr();
         let o = self.get_offset(index);
