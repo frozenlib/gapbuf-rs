@@ -28,4 +28,8 @@ macro_rules! try_finally {
             try_finally!{ {try_finally!($try,$finally)} , $( { $next_finally } ),+ }
         }
     };
+
+    ($($e: expr),+) => {
+        try_finally! { $({$e;}),+ }
+    };
 }

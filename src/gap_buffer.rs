@@ -434,15 +434,23 @@ impl<T> Drop for GapBuffer<T> {
     fn drop(&mut self) {
         unsafe {
             let (s0, s1) = self.as_mut_slices();
-            try_finally!{
-                {
-                    ptr::drop_in_place(s0);
-                },
-                {
-                    ptr::drop_in_place(s1);
-                }
-            }
+            try_finally!(drop_in_place(s0), drop_in_place(s1));
         }
+    }
+}
+
+impl<T> Default for GapBuffer<T> {
+    fn default() -> Self {
+        GapBuffer::new()
+    }
+}
+
+impl<T> Debug for GapBuffer<T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        f.debug_list().entries(self).finish()
     }
 }
 
@@ -545,23 +553,68 @@ impl<'a, T> IntoIterator for &'a mut GapBuffer<T> {
     }
 }
 
-impl<T> Debug for GapBuffer<T>
-where
-    T: Debug,
-{
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        f.debug_list().entries(self).finish()
+impl<T> FromIterator<T> for GapBuffer<T> {
+    fn from_iter<S: IntoIterator<Item = T>>(s: S) -> GapBuffer<T> {
+        let mut buf = GapBuffer::new();
+        buf.extend(s);
+        buf
     }
 }
 
-impl<T> FromIterator<T> for GapBuffer<T> {
-    fn from_iter<S: IntoIterator<Item = T>>(s: S) -> GapBuffer<T> {
-        let iter = s.into_iter();
-        let mut buf = GapBuffer::with_capacity(iter.size_hint().0);
-        for item in iter {
-            buf.push_back(item);
+impl<T, S> PartialEq<S> for GapBuffer<T>
+where
+    T: PartialEq,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn eq(&self, other: &S) -> bool {
+        self.iter().eq(other)
+    }
+}
+impl<T: Eq> Eq for GapBuffer<T> {}
+
+impl<T, S> PartialOrd<S> for GapBuffer<T>
+where
+    T: PartialOrd,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
+        self.iter().partial_cmp(other)
+    }
+}
+
+impl<T: Ord> Ord for GapBuffer<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.iter().cmp(other)
+    }
+}
+
+impl<T: Clone> Clone for GapBuffer<T> {
+    fn clone(&self) -> Self {
+        self.iter().cloned().collect()
+    }
+}
+impl<T> Extend<T> for GapBuffer<T> {
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        let iter = iter.into_iter();
+        self.reserve(iter.size_hint().0);
+        for value in iter {
+            self.push_back(value);
         }
-        buf
+    }
+}
+impl<'a, T: 'a + Copy> Extend<&'a T> for GapBuffer<T> {
+    fn extend<I: IntoIterator<Item = &'a T>>(&mut self, iter: I) {
+        self.extend(iter.into_iter().cloned());
+    }
+}
+
+impl<T: Hash> Hash for GapBuffer<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for value in self {
+            value.hash(state);
+        }
     }
 }
 
@@ -606,73 +659,5 @@ impl<'a, T: 'a> Index<usize> for GapBufferSliceMut<'a, T> {
 impl<'a, T: 'a> IndexMut<usize> for GapBufferSliceMut<'a, T> {
     fn index_mut(&mut self, index: usize) -> &mut T {
         unsafe { &mut *self.ptr.add(self.s.offset_of(index)) }
-    }
-}
-
-impl<T, S> PartialEq<S> for GapBuffer<T>
-where
-    T: PartialEq,
-    S: ?Sized,
-    for<'b> &'b S: IntoIterator<Item = &'b T>,
-{
-    fn eq(&self, other: &S) -> bool {
-        self.iter().eq(other)
-    }
-}
-impl<T: Eq> Eq for GapBuffer<T> {}
-
-impl<T, S> PartialOrd<S> for GapBuffer<T>
-where
-    T: PartialOrd,
-    S: ?Sized,
-    for<'b> &'b S: IntoIterator<Item = &'b T>,
-{
-    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
-        self.iter().partial_cmp(other)
-    }
-}
-
-impl<T: Ord> Ord for GapBuffer<T> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.iter().cmp(other)
-    }
-}
-
-impl<T: Clone> Clone for GapBuffer<T> {
-    fn clone(&self) -> Self {
-        let mut buf = GapBuffer::new();
-        buf.extend(self.iter().cloned());
-        buf
-    }
-}
-impl<T> Extend<T> for GapBuffer<T> {
-    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
-        let iter = iter.into_iter();
-        let size = match iter.size_hint() {
-            (lower, None) => lower,
-            (_, Some(upper)) => upper,
-        };
-        self.reserve(size);
-        for value in iter {
-            self.push_back(value);
-        }
-    }
-}
-impl<'a, T: 'a + Copy> Extend<&'a T> for GapBuffer<T> {
-    fn extend<I: IntoIterator<Item = &'a T>>(&mut self, iter: I) {
-        self.extend(iter.into_iter().cloned());
-    }
-}
-
-impl<T: Hash> Hash for GapBuffer<T> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        for value in self {
-            value.hash(state);
-        }
-    }
-}
-impl<T> Default for GapBuffer<T> {
-    fn default() -> Self {
-        GapBuffer::new()
     }
 }
