@@ -20,29 +20,31 @@ impl<T> RawBuffer<T> {
             return;
         }
         unsafe {
-            let p = if new_cap == 0 {
-                let p = self.as_ptr() as *mut u8;
-                dealloc(p, Self::get_layout(self.cap));
-                NonNull::dangling()
-            } else {
-                let value_size = size_of::<T>();
-                if usize::max_value() / value_size < new_cap {
-                    panic!("memory size overflow");
-                }
-                let p = if self.cap == 0 {
-                    alloc(Self::get_layout(new_cap))
-                } else {
+            let value_size = size_of::<T>();
+            if value_size != 0 {
+                let p = if new_cap == 0 {
                     let p = self.as_ptr() as *mut u8;
-                    let new_size = value_size * new_cap;
-                    realloc(p, Self::get_layout(self.cap), new_size)
-                };
-                if let Some(p) = NonNull::new(p as *mut T) {
-                    p
+                    dealloc(p, Self::get_layout(self.cap));
+                    NonNull::dangling()
                 } else {
-                    handle_alloc_error(Self::get_layout(new_cap))
-                }
-            };
-            self.ptr = p;
+                    if usize::max_value() / value_size < new_cap {
+                        panic!("memory size overflow");
+                    }
+                    let p = if self.cap == 0 {
+                        alloc(Self::get_layout(new_cap))
+                    } else {
+                        let p = self.as_ptr() as *mut u8;
+                        let new_size = value_size * new_cap;
+                        realloc(p, Self::get_layout(self.cap), new_size)
+                    };
+                    if let Some(p) = NonNull::new(p as *mut T) {
+                        p
+                    } else {
+                        handle_alloc_error(Self::get_layout(new_cap))
+                    }
+                };
+                self.ptr = p;
+            }
             self.cap = new_cap;
         }
     }

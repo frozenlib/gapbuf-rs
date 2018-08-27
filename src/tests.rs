@@ -2,14 +2,13 @@
 
 extern crate test;
 
-use super::GapBuffer;
 use self::test::Bencher;
+use super::GapBuffer;
 
-use std::collections::HashSet;
 use std::cell::RefCell;
+use std::collections::HashSet;
 use std::panic;
 use std::panic::AssertUnwindSafe;
-
 
 #[test]
 fn new() {
@@ -105,7 +104,6 @@ fn eq_gapbuf2() {
     assert_eq!(buf, gap_buffer![2, 8]);
 }
 
-
 #[test]
 fn reserve() {
     let mut buf = GapBuffer::<u32>::new();
@@ -120,7 +118,6 @@ fn reserve_push_back() {
     let mut buf = GapBuffer::new();
     buf.reserve(4);
     buf.push_back(8);
-
 
     assert_eq!(buf.len(), 1);
     assert_eq!(buf[0], 8);
@@ -292,7 +289,6 @@ fn index_out_of_range() {
     buf[4];
 }
 
-
 #[bench]
 fn push_back_vec(b: &mut Bencher) {
     b.iter(|| {
@@ -335,9 +331,6 @@ fn push_front_gapbuf(b: &mut Bencher) {
     });
 }
 
-
-
-
 struct TestDrop<'a> {
     t: &'a RefCell<HashSet<&'a str>>,
     name: &'a str,
@@ -370,8 +363,6 @@ impl<'a> Drop for TestDrop<'a> {
         }
     }
 }
-
-
 
 #[test]
 fn drop() {
@@ -427,4 +418,14 @@ fn drop_all_on_panic2() {
     e.insert("B");
     assert_eq!(*t.borrow_mut(), e);
     assert!(r.is_err());
+}
+
+#[test]
+fn zero_sized_type() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(());
+    buf.push_back(());
+
+    assert_eq!((), buf[0]);
+    assert_eq!((), buf[1]);
 }
