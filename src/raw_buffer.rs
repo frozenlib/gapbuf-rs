@@ -1,4 +1,4 @@
-use alloc::alloc::*;
+use std::alloc::*;
 use std::mem::*;
 use std::ptr::*;
 

@@ -1,9 +1,6 @@
-#![feature(alloc)]
 #![feature(generators, generator_trait)]
 #![feature(test)]
 #![feature(crate_in_paths)]
-
-extern crate alloc;
 
 #[macro_use]
 mod finally;
