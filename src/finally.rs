@@ -30,6 +30,6 @@ macro_rules! try_finally {
     };
 
     ($($e: expr),+) => {
-        try_finally! { $({$e;}),+ }
+        try_finally! { $({$e}),+ }
     };
 }
