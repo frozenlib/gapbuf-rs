@@ -62,15 +62,15 @@ macro_rules! gap_buffer {
     ($($x:expr,)*) => (gap_buffer![$($x),*])
 }
 
+/// Dynamic array that allows efficient insertion and deletion operations clustered near the same location.
+///
+/// `GapBuffer` has a member similer to `Vec`.
 pub struct GapBuffer<T> {
     buf: RawBuffer<T>,
     len: usize,
     gap: usize,
 }
 
-/// Dynamic array that allows efficient insertion and deletion operations clustered near the same location.
-///
-/// `GapBuffer` has a member similer to `Vec`.
 impl<T> GapBuffer<T> {
     /// Constructs a new, empty `GapBuffer<T>`.
     ///
