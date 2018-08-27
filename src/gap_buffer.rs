@@ -527,7 +527,12 @@ impl<T> Iterator for IntoIter<T> {
     fn next(&mut self) -> Option<T> {
         self.buf.pop_front()
     }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.buf.len();
+        (len, Some(len))
+    }
 }
+impl<T> ExactSizeIterator for IntoIter<T> {}
 
 impl<T> IntoIterator for GapBuffer<T> {
     type Item = T;
