@@ -1,6 +1,7 @@
 use crate::raw_buffer::RawBuffer;
 use std::cmp::*;
 use std::fmt::{Debug, Error, Formatter};
+use std::hash::*;
 use std::iter::FromIterator;
 use std::marker::PhantomData;
 use std::mem::*;
@@ -634,5 +635,44 @@ where
 impl<T: Ord> Ord for GapBuffer<T> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.iter().cmp(other)
+    }
+}
+
+impl<T: Clone> Clone for GapBuffer<T> {
+    fn clone(&self) -> Self {
+        let mut buf = GapBuffer::new();
+        buf.extend(self.iter().cloned());
+        buf
+    }
+}
+impl<T> Extend<T> for GapBuffer<T> {
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        let iter = iter.into_iter();
+        let size = match iter.size_hint() {
+            (lower, None) => lower,
+            (_, Some(upper)) => upper,
+        };
+        self.reserve(size);
+        for value in iter {
+            self.push_back(value);
+        }
+    }
+}
+impl<'a, T: 'a + Copy> Extend<&'a T> for GapBuffer<T> {
+    fn extend<I: IntoIterator<Item = &'a T>>(&mut self, iter: I) {
+        self.extend(iter.into_iter().cloned());
+    }
+}
+
+impl<T: Hash> Hash for GapBuffer<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for value in self {
+            value.hash(state);
+        }
+    }
+}
+impl<T> Default for GapBuffer<T> {
+    fn default() -> Self {
+        GapBuffer::new()
     }
 }
