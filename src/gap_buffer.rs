@@ -183,6 +183,8 @@ impl<T> GapBuffer<T> {
         self.buf.realloc(len);
     }
 
+    /// Set gap offset.
+    /// This operation is O((gap-self.gap()).abs()).
     pub fn set_gap(&mut self, gap: usize) {
         let len = self.len;
         assert!(gap <= len);
@@ -210,6 +212,8 @@ impl<T> GapBuffer<T> {
         }
         self.gap = gap;
     }
+
+    /// Returns the number of gap offset.
     #[inline]
     pub fn gap(&self) -> usize {
         self.gap
@@ -220,6 +224,11 @@ impl<T> GapBuffer<T> {
         self.set_gap(gap);
     }
 
+    /// Inserts an element at position index within the `GapBuffer<T>`.
+    /// This operation is O((index-self.gap()).abs())
+    ///
+    /// # Panics
+    /// Panics if index > len.
     pub fn insert(&mut self, index: usize, element: T) {
         assert!(index <= self.len);
         self.set_gap_with_reserve(index, 1);
@@ -535,17 +544,6 @@ impl<'a, T> IntoIterator for &'a mut GapBuffer<T> {
     }
 }
 
-impl<T, S> PartialEq<S> for GapBuffer<T>
-where
-    T: PartialEq<T>,
-    S: ?Sized,
-    for<'b> &'b S: IntoIterator<Item = &'b T>,
-{
-    fn eq(&self, other: &S) -> bool {
-        self.iter().eq(other.into_iter())
-    }
-}
-
 impl<T> Debug for GapBuffer<T>
 where
     T: Debug,
@@ -607,5 +605,34 @@ impl<'a, T: 'a> Index<usize> for GapBufferSliceMut<'a, T> {
 impl<'a, T: 'a> IndexMut<usize> for GapBufferSliceMut<'a, T> {
     fn index_mut(&mut self, index: usize) -> &mut T {
         unsafe { &mut *self.ptr.add(self.s.offset_of(index)) }
+    }
+}
+
+impl<T, S> PartialEq<S> for GapBuffer<T>
+where
+    T: PartialEq,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn eq(&self, other: &S) -> bool {
+        self.iter().eq(other)
+    }
+}
+impl<T: Eq> Eq for GapBuffer<T> {}
+
+impl<T, S> PartialOrd<S> for GapBuffer<T>
+where
+    T: PartialOrd,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
+        self.iter().partial_cmp(other)
+    }
+}
+
+impl<T: Ord> Ord for GapBuffer<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.iter().cmp(other)
     }
 }

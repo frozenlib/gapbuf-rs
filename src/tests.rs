@@ -21,16 +21,6 @@ fn new() {
 }
 
 #[test]
-fn with_capacity() {
-    let buf = GapBuffer::<u32>::with_capacity(10);
-
-    assert_eq!(buf.is_empty(), true);
-    assert_eq!(buf.len(), 0);
-    assert_eq!(buf.gap(), 0);
-    assert!(buf.capacity() >= 10);
-}
-
-#[test]
 fn push_back1() {
     let mut buf = GapBuffer::new();
     buf.push_back(9);
