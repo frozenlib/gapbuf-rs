@@ -21,6 +21,16 @@ fn new() {
 }
 
 #[test]
+fn with_capacity() {
+    let buf = GapBuffer::<u32>::with_capacity(10);
+
+    assert_eq!(buf.is_empty(), true);
+    assert_eq!(buf.len(), 0);
+    assert_eq!(buf.gap(), 0);
+    assert!(buf.capacity() >= 10);
+}
+
+#[test]
 fn push_back1() {
     let mut buf = GapBuffer::new();
     buf.push_back(9);
@@ -428,4 +438,18 @@ fn zero_sized_type() {
 
     assert_eq!((), buf[0]);
     assert_eq!((), buf[1]);
+}
+
+#[test]
+fn impl_sync() {
+    fn f(_: impl Sync) {}
+    let buf = GapBuffer::<usize>::new();
+    f(buf);
+}
+
+#[test]
+fn impl_send() {
+    fn f(_: impl Send) {}
+    let buf = GapBuffer::<usize>::new();
+    f(buf);
 }

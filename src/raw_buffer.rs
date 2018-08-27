@@ -67,3 +67,6 @@ impl<T> Drop for RawBuffer<T> {
         self.realloc(0);
     }
 }
+
+unsafe impl<T: Sync> Sync for RawBuffer<T> {}
+unsafe impl<T: Send> Send for RawBuffer<T> {}
