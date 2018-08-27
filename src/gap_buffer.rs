@@ -145,6 +145,10 @@ impl<T> GapBuffer<T> {
     pub fn reserve(&mut self, additional: usize) {
         self.reserve_as(additional, false);
     }
+
+    /// Reserves the minimum capacity for exactly additional more elements to be inserted in the given `GapBuffer<T>`.
+    /// After calling reserve_exact, capacity will be greater than or equal to self.len() + additional.
+    /// Does nothing if the capacity is already sufficient.
     pub fn reserve_exact(&mut self, additional: usize) {
         self.reserve_as(additional, true);
     }
