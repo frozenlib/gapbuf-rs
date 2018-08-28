@@ -1,10 +1,7 @@
-#![cfg(test)]
+#[macro_use]
+extern crate gapbuf;
 
-extern crate test;
-
-use self::test::Bencher;
-use super::GapBuffer;
-
+use gapbuf::GapBuffer;
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::panic;
@@ -287,48 +284,6 @@ fn index_out_of_range() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
     buf[4];
-}
-
-#[bench]
-fn push_back_vec(b: &mut Bencher) {
-    b.iter(|| {
-        let mut b = Vec::new();
-        for n in 0..1000 {
-            b.push(n)
-        }
-        b
-    });
-}
-#[bench]
-fn push_back_gapbuf(b: &mut Bencher) {
-    b.iter(|| {
-        let mut b = GapBuffer::new();
-        for n in 0..1000 {
-            b.push_back(n)
-        }
-        b
-    });
-}
-
-#[bench]
-fn push_front_vec(b: &mut Bencher) {
-    b.iter(|| {
-        let mut b = Vec::new();
-        for n in 0..1000 {
-            b.insert(0, n)
-        }
-        b
-    });
-}
-#[bench]
-fn push_front_gapbuf(b: &mut Bencher) {
-    b.iter(|| {
-        let mut b = GapBuffer::new();
-        for n in 0..1000 {
-            b.push_front(n)
-        }
-        b
-    });
 }
 
 struct TestDrop<'a> {
