@@ -190,11 +190,11 @@ impl<T> GapBuffer<T> {
     pub fn set_gap(&mut self, gap: usize) {
         assert!(gap <= self.len);
         if gap != self.gap {
-            self.set_gap_internal(gap);
+            self.move_values(gap);
             self.gap = gap;
         }
     }
-    fn set_gap_internal(&mut self, gap: usize) {
+    fn move_values(&mut self, gap: usize) {
         let gap_old = self.gap;
         let gap_len = self.gap_len();
         let (src, dest, count) = if gap < gap_old {
