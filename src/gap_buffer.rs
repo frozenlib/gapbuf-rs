@@ -244,9 +244,17 @@ impl<T> GapBuffer<T> {
     ///
     /// # Panics
     /// Panics if the number of elements in the gap buffer overflows a usize.
+    #[inline]
     pub fn push_back(&mut self, value: T) {
         let len = self.len;
-        self.insert(len, value);
+        if self.gap != len || len == self.capacity() {
+            self.set_gap_with_reserve(len, 1);
+        }
+        unsafe {
+            write(self.buf.as_ptr().add(len), value);
+        }
+        self.gap += 1;
+        self.len += 1;
     }
     pub fn push_front(&mut self, value: T) {
         self.insert(0, value);
