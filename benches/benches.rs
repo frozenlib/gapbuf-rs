@@ -83,7 +83,7 @@ fn collect_gapbuf(b: &mut Bencher) {
     });
 }
 #[bench]
-fn deque(b: &mut Bencher) {
+fn collect_deque(b: &mut Bencher) {
     b.iter(|| {
         let b: VecDeque<_> = (0..1000).collect();
         b
