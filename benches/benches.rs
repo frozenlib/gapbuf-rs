@@ -62,8 +62,7 @@ fn push_front_deque(b: &mut Bencher) {
     b.iter(|| {
         let mut b = VecDeque::new();
         for n in 0..10000 {
-            let mid = b.len() / 2;
-            b.insert(mid, n)
+            b.push_front(n)
         }
         b
     });
@@ -96,7 +95,8 @@ fn insert_mid_deque(b: &mut Bencher) {
     b.iter(|| {
         let mut b = VecDeque::new();
         for n in 0..10000 {
-            b.push_front(n)
+            let mid = b.len() / 2;
+            b.insert(mid, n)
         }
         b
     });
