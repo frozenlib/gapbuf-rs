@@ -27,7 +27,7 @@ fn push_back_gapbuf(b: &mut Bencher) {
     });
 }
 #[bench]
-fn push_back_vec_deque(b: &mut Bencher) {
+fn push_back_deque(b: &mut Bencher) {
     b.iter(|| {
         let mut b = VecDeque::new();
         for n in 0..1000 {
@@ -58,12 +58,34 @@ fn push_front_gapbuf(b: &mut Bencher) {
     });
 }
 #[bench]
-fn push_front_vec_deque(b: &mut Bencher) {
+fn push_front_deque(b: &mut Bencher) {
     b.iter(|| {
         let mut b = VecDeque::new();
         for n in 0..1000 {
             b.push_front(n)
         }
+        b
+    });
+}
+
+#[bench]
+fn collect_vec(b: &mut Bencher) {
+    b.iter(|| {
+        let b: Vec<_> = (0..1000).collect();
+        b
+    });
+}
+#[bench]
+fn collect_gapbuf(b: &mut Bencher) {
+    b.iter(|| {
+        let b: GapBuffer<_> = (0..1000).collect();
+        b
+    });
+}
+#[bench]
+fn deque(b: &mut Bencher) {
+    b.iter(|| {
+        let b: VecDeque<_> = (0..1000).collect();
         b
     });
 }
