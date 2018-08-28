@@ -220,9 +220,11 @@ impl<T> GapBuffer<T> {
         self.gap
     }
 
+    #[inline]
     pub fn set_gap_with_reserve(&mut self, gap: usize, additional: usize) {
         self.reserve(additional);
         self.set_gap(gap);
+        assert_eq!(self.gap, gap);
     }
 
     /// Inserts an element at position index within the `GapBuffer<T>`.
@@ -618,7 +620,9 @@ impl<T: Clone> Clone for GapBuffer<T> {
 impl<T> Extend<T> for GapBuffer<T> {
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
         let iter = iter.into_iter();
-        self.reserve(iter.size_hint().0);
+        let len = self.len();
+        self.set_gap_with_reserve(len, iter.size_hint().0);
+
         for value in iter {
             self.push_back(value);
         }
