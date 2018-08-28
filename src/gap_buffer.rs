@@ -195,18 +195,12 @@ impl<T> GapBuffer<T> {
         }
     }
     fn set_gap_internal(&mut self, gap: usize) {
-        let src;
-        let dest;
-        let count;
         let gap_old = self.gap;
-        if gap < gap_old {
-            src = gap;
-            dest = gap + self.gap_len();
-            count = gap_old - gap;
+        let gap_len = self.gap_len();
+        let (src, dest, count) = if gap < gap_old {
+            (gap, gap + gap_len, gap_old - gap)
         } else {
-            src = gap_old + self.gap_len();
-            dest = gap_old;
-            count = gap - gap_old;
+            (gap_old + gap_len, gap_old, gap - gap_old)
         };
         let p = self.buf.as_ptr();
         unsafe {
