@@ -186,18 +186,19 @@ impl<T> GapBuffer<T> {
 
     /// Set gap offset.
     /// This operation is O((gap-self.gap()).abs()).
+    #[inline]
     pub fn set_gap(&mut self, gap: usize) {
-        let len = self.len;
-        assert!(gap <= len);
-
-        let gap_old = self.gap;
-        if gap == gap_old {
-            return;
+        assert!(gap <= self.len);
+        if gap != self.gap {
+            self.set_gap_internal(gap);
+            self.gap = gap;
         }
-
+    }
+    fn set_gap_internal(&mut self, gap: usize) {
         let src;
         let dest;
         let count;
+        let gap_old = self.gap;
         if gap < gap_old {
             src = gap;
             dest = gap + self.gap_len();
@@ -211,7 +212,6 @@ impl<T> GapBuffer<T> {
         unsafe {
             copy(p.add(src), p.add(dest), count);
         }
-        self.gap = gap;
     }
 
     /// Returns the number of gap offset.
@@ -224,7 +224,6 @@ impl<T> GapBuffer<T> {
     pub fn set_gap_with_reserve(&mut self, gap: usize, additional: usize) {
         self.reserve(additional);
         self.set_gap(gap);
-        assert_eq!(self.gap, gap);
     }
 
     /// Inserts an element at position index within the `GapBuffer<T>`.
