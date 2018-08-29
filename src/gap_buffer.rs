@@ -67,6 +67,7 @@ macro_rules! gap_buffer {
 /// Dynamic array that allows efficient insertion and deletion operations clustered near the same location.
 ///
 /// `GapBuffer` has a member similer to `Vec`.
+#[derive(Hash)]
 pub struct GapBuffer<T>(RawGapBuffer<T>);
 
 impl<T> GapBuffer<T> {
@@ -347,13 +348,6 @@ impl<T> GapBuffer<T> {
             _ => Some(self.remove(len - 1)),
         }
     }
-
-    pub fn iter(&self) -> Iter<T> {
-        Iter { buf: self, idx: 0 }
-    }
-    pub fn iter_mut(&mut self) -> IterMut<T> {
-        IterMut { buf: self, idx: 0 }
-    }
 }
 
 impl<T> GapBuffer<T>
@@ -472,14 +466,7 @@ impl<'a, T: 'a + Copy> Extend<&'a T> for GapBuffer<T> {
     }
 }
 
-impl<T: Hash> Hash for GapBuffer<T> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        for value in self {
-            value.hash(state);
-        }
-    }
-}
-
+#[derive(Hash)]
 struct RawGapBuffer<T>(Slice<T>);
 
 impl<T> RawGapBuffer<T> {
@@ -533,10 +520,14 @@ impl<T> Drop for RawGapBuffer<T> {
         self.realloc(0)
     }
 }
+
+#[derive(Hash)]
 pub struct Range<'a, T: 'a> {
     s: Slice<T>,
     _phantom: PhantomData<&'a [T]>,
 }
+
+#[derive(Hash)]
 pub struct RangeMut<'a, T: 'a> {
     s: Slice<T>,
     _phantom: PhantomData<&'a mut [T]>,
@@ -711,6 +702,12 @@ impl<T> Slice<T> {
     pub fn as_mut_slice(&mut self) -> &mut Self {
         self
     }
+    pub fn iter(&self) -> Iter<T> {
+        Iter { s: self, idx: 0 }
+    }
+    pub fn iter_mut(&mut self) -> IterMut<T> {
+        IterMut { s: self, idx: 0 }
+    }
 
     #[inline]
     fn get_offset(&self, index: usize) -> usize {
@@ -790,48 +787,56 @@ impl<T> IndexMut<usize> for Slice<T> {
     }
 }
 
+impl<T: Hash> Hash for Slice<T> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        for value in self {
+            value.hash(state);
+        }
+    }
+}
+
 pub struct Iter<'a, T: 'a> {
-    buf: &'a GapBuffer<T>,
+    s: &'a Slice<T>,
     idx: usize,
 }
 impl<'a, T: 'a> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<&'a T> {
-        if self.idx == self.buf.len {
+        if self.idx == self.s.len {
             None
         } else {
             let i = self.idx;
             self.idx += 1;
-            Some(&self.buf[i])
+            Some(&self.s[i])
         }
     }
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = self.buf.len - self.idx;
+        let len = self.s.len - self.idx;
         (len, Some(len))
     }
 }
 impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
 
 pub struct IterMut<'a, T: 'a> {
-    buf: &'a mut GapBuffer<T>,
+    s: &'a mut Slice<T>,
     idx: usize,
 }
 impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     type Item = &'a mut T;
 
     fn next(&mut self) -> Option<&'a mut T> {
-        if self.idx == self.buf.len {
+        if self.idx == self.s.len {
             None
         } else {
-            let p = self.buf.as_mut_ptr();
-            let o = self.buf.get_offset(self.idx);
+            let p = self.s.as_mut_ptr();
+            let o = self.s.get_offset(self.idx);
             self.idx += 1;
             unsafe { Some(&mut *p.add(o)) }
         }
     }
     fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = self.buf.len - self.idx;
+        let len = self.s.len - self.idx;
         (len, Some(len))
     }
 }
@@ -868,8 +873,44 @@ impl<'a, T> IntoIterator for &'a GapBuffer<T> {
         self.iter()
     }
 }
+impl<'a, T> IntoIterator for &'a Range<'a, T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+    fn into_iter(self) -> Iter<'a, T> {
+        self.iter()
+    }
+}
+impl<'a, T> IntoIterator for &'a RangeMut<'a, T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+    fn into_iter(self) -> Iter<'a, T> {
+        self.iter()
+    }
+}
+
+impl<'a, T> IntoIterator for &'a Slice<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+    fn into_iter(self) -> Iter<'a, T> {
+        self.iter()
+    }
+}
 
 impl<'a, T> IntoIterator for &'a mut GapBuffer<T> {
+    type Item = &'a mut T;
+    type IntoIter = IterMut<'a, T>;
+    fn into_iter(self) -> IterMut<'a, T> {
+        self.iter_mut()
+    }
+}
+impl<'a, T> IntoIterator for &'a mut RangeMut<'a, T> {
+    type Item = &'a mut T;
+    type IntoIter = IterMut<'a, T>;
+    fn into_iter(self) -> IterMut<'a, T> {
+        self.iter_mut()
+    }
+}
+impl<'a, T> IntoIterator for &'a mut Slice<T> {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
     fn into_iter(self) -> IterMut<'a, T> {
