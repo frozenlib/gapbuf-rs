@@ -393,15 +393,6 @@ impl<T> DerefMut for GapBuffer<T> {
     }
 }
 
-impl<T> Debug for GapBuffer<T>
-where
-    T: Debug,
-{
-    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
-        f.debug_list().entries(self).finish()
-    }
-}
-
 impl<T> FromIterator<T> for GapBuffer<T> {
     fn from_iter<S: IntoIterator<Item = T>>(s: S) -> GapBuffer<T> {
         let mut buf = GapBuffer::new();
@@ -785,6 +776,39 @@ impl<T> IndexMut<usize> for Slice<T> {
         let p = self.as_mut_ptr();
         let o = self.get_offset(index);
         unsafe { &mut *p.add(o) }
+    }
+}
+
+impl<T> Debug for GapBuffer<T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        self.deref().fmt(f)
+    }
+}
+impl<'a, T> Debug for Range<'a, T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        self.deref().fmt(f)
+    }
+}
+impl<'a, T> Debug for RangeMut<'a, T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        self.deref().fmt(f)
+    }
+}
+impl<T> Debug for Slice<T>
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        f.debug_list().entries(self).finish()
     }
 }
 
