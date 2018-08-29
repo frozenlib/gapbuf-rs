@@ -178,6 +178,7 @@ impl<T> GapBuffer<T> {
         }
     }
 
+    /// Shrinks the capacity of the GapBuffer as much as possible.
     pub fn shrink_to_fit(&mut self) {
         let len = self.len;
         self.set_gap(len);
@@ -185,6 +186,7 @@ impl<T> GapBuffer<T> {
     }
 
     /// Set gap offset.
+    ///
     /// This operation is O((gap-self.gap()).abs()).
     #[inline]
     pub fn set_gap(&mut self, gap: usize) {
@@ -251,9 +253,21 @@ impl<T> GapBuffer<T> {
         self.gap += 1;
         self.len += 1;
     }
+
+    /// Prepends an element to the GapBuffer.
     pub fn push_front(&mut self, value: T) {
         self.insert(0, value);
     }
+
+    /// Swaps two elements in the GapBuffer.
+    ///
+    /// # Arguments
+    ///
+    /// * a - The index of the first element
+    /// * b - The index of the second element
+    ///
+    /// # Panics
+    /// Panics if a or b are out of bounds.
     pub fn swap(&mut self, a: usize, b: usize) {
         let oa = self.get_offset(a);
         let ob = self.get_offset(b);
