@@ -727,13 +727,13 @@ impl<T> Index<usize> for GapBuffer<T> {
 
     #[inline]
     fn index(&self, index: usize) -> &T {
-        self.as_slice().index(index)
+        self.deref().index(index)
     }
 }
 impl<T> IndexMut<usize> for GapBuffer<T> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
-        self.as_mut_slice().index_mut(index)
+        self.deref_mut().index_mut(index)
     }
 }
 
@@ -742,7 +742,7 @@ impl<'a, T> Index<usize> for Range<'a, T> {
 
     #[inline]
     fn index(&self, index: usize) -> &T {
-        self.as_slice().index(index)
+        self.deref().index(index)
     }
 }
 impl<'a, T> Index<usize> for RangeMut<'a, T> {
@@ -750,13 +750,13 @@ impl<'a, T> Index<usize> for RangeMut<'a, T> {
 
     #[inline]
     fn index(&self, index: usize) -> &T {
-        self.as_slice().index(index)
+        self.deref().index(index)
     }
 }
 impl<'a, T> IndexMut<usize> for RangeMut<'a, T> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
-        self.as_mut_slice().index_mut(index)
+        self.deref_mut().index_mut(index)
     }
 }
 
