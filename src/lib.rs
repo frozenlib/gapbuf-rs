@@ -1,4 +1,3 @@
-#![feature(generators, generator_trait)]
 #![feature(crate_in_paths)]
 
 #[macro_use]
