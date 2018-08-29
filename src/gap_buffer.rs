@@ -207,14 +207,28 @@ impl<T> GapBuffer<T> {
     ///
     /// # Panics
     /// Panics if index > len.
+    #[inline]
     pub fn insert(&mut self, index: usize, element: T) {
         assert!(index <= self.len());
-        self.set_gap_with_reserve(index, 1);
+        if self.gap() != index || self.len == self.capacity() {
+            self.set_gap_with_reserve(index, 1);
+        }
         unsafe {
             write(self.as_mut_ptr().add(index), element);
         }
         self.gap += 1;
         self.len += 1;
+    }
+
+    #[inline]
+    pub fn insert_iter(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
+        assert!(index <= self.len());
+        let iter = iter.into_iter();
+        self.set_gap_with_reserve(index, iter.size_hint().0);
+        for value in iter {
+            self.insert(index, value);
+            index += 1;
+        }
     }
 
     /// Appends an element to the back of a collection.
@@ -223,15 +237,8 @@ impl<T> GapBuffer<T> {
     /// Panics if the number of elements in the gap buffer overflows a usize.
     #[inline]
     pub fn push_back(&mut self, value: T) {
-        let len = self.len();
-        if self.gap() != len || len == self.capacity() {
-            self.set_gap_with_reserve(len, 1);
-        }
-        unsafe {
-            write(self.as_mut_ptr().add(len), value);
-        }
-        self.gap += 1;
-        self.len += 1;
+        let len = self.len;
+        self.insert(len, value);
     }
 
     /// Prepends an element to the GapBuffer.
