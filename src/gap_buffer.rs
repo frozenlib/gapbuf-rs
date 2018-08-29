@@ -400,35 +400,6 @@ impl<T> FromIterator<T> for GapBuffer<T> {
     }
 }
 
-impl<T, S> PartialEq<S> for GapBuffer<T>
-where
-    T: PartialEq,
-    S: ?Sized,
-    for<'b> &'b S: IntoIterator<Item = &'b T>,
-{
-    fn eq(&self, other: &S) -> bool {
-        self.iter().eq(other)
-    }
-}
-impl<T: Eq> Eq for GapBuffer<T> {}
-
-impl<T, S> PartialOrd<S> for GapBuffer<T>
-where
-    T: PartialOrd,
-    S: ?Sized,
-    for<'b> &'b S: IntoIterator<Item = &'b T>,
-{
-    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
-        self.iter().partial_cmp(other)
-    }
-}
-
-impl<T: Ord> Ord for GapBuffer<T> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.iter().cmp(other)
-    }
-}
-
 impl<T: Clone> Clone for GapBuffer<T> {
     fn clone(&self) -> Self {
         self.iter().cloned().collect()
@@ -506,6 +477,10 @@ impl<T> Drop for RawGapBuffer<T> {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Range, RangeMut
+////////////////////////////////////////////////////////////////////////////////
+
 #[derive(Hash)]
 pub struct Range<'a, T: 'a> {
     s: Slice<T>,
@@ -569,6 +544,10 @@ impl<'a, T> DerefMut for RangeMut<'a, T> {
         &mut self.s
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Slice
+////////////////////////////////////////////////////////////////////////////////
 
 pub struct Slice<T> {
     ptr: NonNull<T>,
@@ -702,6 +681,10 @@ impl<T> Slice<T> {
 unsafe impl<T: Sync> Sync for Slice<T> {}
 unsafe impl<T: Send> Send for Slice<T> {}
 
+////////////////////////////////////////////////////////////////////////////////
+// Default
+////////////////////////////////////////////////////////////////////////////////
+
 impl<T> Default for GapBuffer<T> {
     #[inline]
     fn default() -> Self {
@@ -720,6 +703,10 @@ impl<'a, T> Default for RangeMut<'a, T> {
         Self::empty()
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Index, IndexMut
+////////////////////////////////////////////////////////////////////////////////
 
 impl<T> Index<usize> for GapBuffer<T> {
     type Output = T;
@@ -778,6 +765,10 @@ impl<T> IndexMut<usize> for Slice<T> {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Debug
+////////////////////////////////////////////////////////////////////////////////
+
 impl<T> Debug for GapBuffer<T>
 where
     T: Debug,
@@ -818,6 +809,134 @@ impl<T: Hash> Hash for Slice<T> {
         }
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Eq, PartialEq
+////////////////////////////////////////////////////////////////////////////////
+
+impl<T, S> PartialEq<S> for GapBuffer<T>
+where
+    T: PartialEq,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn eq(&self, other: &S) -> bool {
+        self.deref().eq(other)
+    }
+}
+impl<T: Eq> Eq for GapBuffer<T> {}
+
+impl<'a, T, S> PartialEq<S> for Range<'a, T>
+where
+    T: PartialEq,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn eq(&self, other: &S) -> bool {
+        self.deref().eq(other)
+    }
+}
+impl<'a, T: Eq> Eq for Range<'a, T> {}
+
+impl<'a, T, S> PartialEq<S> for RangeMut<'a, T>
+where
+    T: PartialEq,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn eq(&self, other: &S) -> bool {
+        self.deref().eq(other)
+    }
+}
+impl<'a, T: Eq> Eq for RangeMut<'a, T> {}
+
+impl<T, S> PartialEq<S> for Slice<T>
+where
+    T: PartialEq,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn eq(&self, other: &S) -> bool {
+        self.iter().eq(other)
+    }
+}
+impl<T: Eq> Eq for Slice<T> {}
+
+////////////////////////////////////////////////////////////////////////////////
+// Ord, PartialOrd
+////////////////////////////////////////////////////////////////////////////////
+
+impl<T, S> PartialOrd<S> for GapBuffer<T>
+where
+    T: PartialOrd,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
+        self.deref().partial_cmp(other)
+    }
+}
+
+impl<T: Ord> Ord for GapBuffer<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.deref().cmp(other)
+    }
+}
+
+impl<'a, T, S> PartialOrd<S> for Range<'a, T>
+where
+    T: PartialOrd,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
+        self.deref().partial_cmp(other)
+    }
+}
+
+impl<'a, T: Ord> Ord for Range<'a, T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.deref().cmp(other)
+    }
+}
+
+impl<'a, T, S> PartialOrd<S> for RangeMut<'a, T>
+where
+    T: PartialOrd,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
+        self.deref().partial_cmp(other)
+    }
+}
+
+impl<'a, T: Ord> Ord for RangeMut<'a, T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.deref().cmp(other)
+    }
+}
+
+impl<T, S> PartialOrd<S> for Slice<T>
+where
+    T: PartialOrd,
+    S: ?Sized,
+    for<'b> &'b S: IntoIterator<Item = &'b T>,
+{
+    fn partial_cmp(&self, other: &S) -> Option<Ordering> {
+        self.iter().partial_cmp(other)
+    }
+}
+
+impl<T: Ord> Ord for Slice<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.iter().cmp(other)
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// iterator
+////////////////////////////////////////////////////////////////////////////////
 
 pub struct Iter<'a, T: 'a> {
     s: &'a Slice<T>,
@@ -897,14 +1016,14 @@ impl<'a, T> IntoIterator for &'a GapBuffer<T> {
         self.iter()
     }
 }
-impl<'a, T> IntoIterator for &'a Range<'a, T> {
+impl<'a, 'b, T> IntoIterator for &'a Range<'b, T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
     fn into_iter(self) -> Iter<'a, T> {
         self.iter()
     }
 }
-impl<'a, T> IntoIterator for &'a RangeMut<'a, T> {
+impl<'a, 'b, T> IntoIterator for &'a RangeMut<'b, T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
     fn into_iter(self) -> Iter<'a, T> {
