@@ -1,15 +1,13 @@
-pub struct DropFn<F: FnOnce()> {
-    f: Option<F>,
-}
+pub struct DropFn<F: FnOnce()>(Option<F>);
 impl<F: FnOnce()> DropFn<F> {
     pub fn new(f: F) -> DropFn<F> {
-        DropFn { f: Some(f) }
+        DropFn(Some(f))
     }
 }
 impl<F: FnOnce()> Drop for DropFn<F> {
     fn drop(&mut self) {
         use std::mem;
-        if let Some(f) = mem::replace(&mut self.f, None) {
+        if let Some(f) = mem::replace(&mut self.0, None) {
             f();
         }
     }
