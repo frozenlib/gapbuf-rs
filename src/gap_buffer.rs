@@ -544,6 +544,18 @@ impl<'a, T> DerefMut for RangeMut<'a, T> {
         &mut self.s
     }
 }
+impl<'a, T> Clone for Range<'a, T> {
+    fn clone(&self) -> Self {
+        unsafe {
+            Range::new(Slice {
+                ptr: self.ptr,
+                cap: self.cap,
+                gap: self.gap,
+                len: self.len,
+            })
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Slice
