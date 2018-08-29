@@ -5,7 +5,6 @@ use std::hash::*;
 use std::iter::FromIterator;
 use std::marker::PhantomData;
 use std::mem::*;
-use std::ops::RangeBounds;
 use std::ops::*;
 use std::ops::{Index, IndexMut};
 use std::ptr;
