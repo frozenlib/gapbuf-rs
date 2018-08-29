@@ -235,8 +235,16 @@ impl<T> GapBuffer<T> {
     }
 
     /// Prepends an element to the GapBuffer.
+    #[inline]
     pub fn push_front(&mut self, value: T) {
-        self.insert(0, value);
+        let len = self.len();
+        if self.gap() != 0 || len == self.capacity() {
+            self.set_gap_with_reserve(0, 1);
+        }
+        unsafe {
+            write(self.as_mut_ptr().add(self.cap - self.len - 1), value);
+        }
+        self.len += 1;
     }
 
     /// Swaps two elements in the GapBuffer.
