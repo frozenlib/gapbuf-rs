@@ -6,6 +6,5 @@ mod finally;
 
 #[macro_use]
 mod gap_buffer;
-mod raw_buffer;
 
 pub use gap_buffer::GapBuffer;
