@@ -378,11 +378,6 @@ impl<T> Drop for GapBuffer<T> {
     }
 }
 
-impl<T> Default for GapBuffer<T> {
-    fn default() -> Self {
-        GapBuffer::new()
-    }
-}
 impl<T> Deref for GapBuffer<T> {
     type Target = Slice<T>;
 
@@ -561,19 +556,6 @@ impl<'a, T: 'a> RangeMut<'a, T> {
     }
 }
 
-impl<'a, T> Default for Range<'a, T> {
-    #[inline]
-    fn default() -> Self {
-        Range::empty()
-    }
-}
-impl<'a, T> Default for RangeMut<'a, T> {
-    #[inline]
-    fn default() -> Self {
-        RangeMut::empty()
-    }
-}
-
 impl<'a, T> Deref for Range<'a, T> {
     type Target = Slice<T>;
 
@@ -729,6 +711,25 @@ impl<T> Slice<T> {
 }
 unsafe impl<T: Sync> Sync for Slice<T> {}
 unsafe impl<T: Send> Send for Slice<T> {}
+
+impl<T> Default for GapBuffer<T> {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl<'a, T> Default for Range<'a, T> {
+    #[inline]
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+impl<'a, T> Default for RangeMut<'a, T> {
+    #[inline]
+    fn default() -> Self {
+        Self::empty()
+    }
+}
 
 impl<T> Index<usize> for GapBuffer<T> {
     type Output = T;
