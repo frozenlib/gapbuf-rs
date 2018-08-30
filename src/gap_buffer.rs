@@ -201,7 +201,10 @@ impl<T> GapBuffer<T> {
     ///
     /// let mut buf = GapBuffer::new();
     /// buf.push_back(1);
+    ///
     /// buf.reserve(10);
+    /// assert!(buf.capacity() >= 11);
+    ///
     /// buf.shrink_to_fit();
     /// assert_eq!(buf.capacity(), 1);
     /// ```
@@ -257,6 +260,8 @@ impl<T> GapBuffer<T> {
     /// # Panics
     /// Panics if `index > len`.
     ///
+    /// Panics if the number of elements in the gap buffer overflows a usize.
+    ///
     /// # Computational amount
     /// `O(n)` , `n = |index - self.gap()|`
     #[inline]
@@ -272,6 +277,12 @@ impl<T> GapBuffer<T> {
         self.len += 1;
     }
 
+    /// Inserts multiple elements at position index within the `GapBuffer<T>`.
+    ///
+    /// # Panics
+    /// Panics if `index > len`.
+    ///
+    /// Panics if the number of elements in the gap buffer overflows a usize.
     #[inline]
     pub fn insert_iter(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
         assert!(index <= self.len());
@@ -283,7 +294,7 @@ impl<T> GapBuffer<T> {
         }
     }
 
-    /// Appends an element to the back of a collection.
+    /// Appends an element to the back of a GapBuffer.
     ///
     /// # Panics
     /// Panics if the number of elements in the gap buffer overflows a usize.
@@ -294,6 +305,9 @@ impl<T> GapBuffer<T> {
     }
 
     /// Prepends an element to the GapBuffer.
+    ///
+    /// # Panics
+    /// Panics if the number of elements in the gap buffer overflows a usize.
     #[inline]
     pub fn push_front(&mut self, value: T) {
         let len = self.len();
@@ -314,7 +328,7 @@ impl<T> GapBuffer<T> {
     /// * b - The index of the second element
     ///
     /// # Panics
-    /// Panics if a or b are out of bounds.
+    /// Panics if `a >= self.len()` or `b >= self.len()`.
     #[inline]
     pub fn swap(&mut self, a: usize, b: usize) {
         let oa = self.get_offset(a);
@@ -322,6 +336,30 @@ impl<T> GapBuffer<T> {
         let p = self.as_mut_ptr();
         unsafe { ptr::swap(p.add(oa), p.add(ob)) }
     }
+
+    /// Removes an element from the GapBuffer and returns it.
+    ///
+    /// The removed element is replaced by the near the gap.
+    ///
+    /// # Panics
+    /// Panics if `index >= self.len()`.
+    ///
+    /// # Computational amount
+    /// `O(1)`
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate gapbuf;
+    /// # fn main() {
+    /// use gapbuf::GapBuffer;
+    ///
+    /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
+    /// buf.set_gap(5);
+    /// let value = buf.swap_remove(0);
+    /// assert_eq!(value, 1);
+    /// assert_eq!(buf, [5, 2, 3, 4]);
+    /// # }
+    /// ```
     pub fn swap_remove(&mut self, index: usize) -> T {
         assert!(index < self.len());
 
@@ -344,6 +382,26 @@ impl<T> GapBuffer<T> {
             value
         }
     }
+
+    /// Removes an element from the GapBuffer and returns it.
+    ///
+    /// # Panics
+    /// Panics if `index >= self.len()`.
+    ///
+    /// # Computational amount
+    /// `O(n)`, `n = |index - self.gap()|`
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate gapbuf;
+    /// # fn main() {
+    /// use gapbuf::GapBuffer;
+    ///
+    /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
+    /// let value = buf.remove(0);
+    /// assert_eq!(value, 1);
+    /// assert_eq!(buf, [2, 3, 4, 5]);
+    /// # }
     pub fn remove(&mut self, index: usize) -> T {
         assert!(index <= self.len());
         let offset;
@@ -361,9 +419,31 @@ impl<T> GapBuffer<T> {
         }
         unsafe { ptr::read(self.as_ptr().add(offset)) }
     }
+
+    /// Clears the GapBuffer, removing all values.
+    ///
+    /// Note that this method has no effect on the allocated capacity of the GapBuffer.
     pub fn clear(&mut self) {
         self.truncate(0);
     }
+
+    /// Shortens the GapBuffer, keeping the first len elements and dropping the rest.
+    ///
+    /// If len is greater than the GapBuffer's current length, this has no effect.
+    ///
+    /// Note that this method has no effect on the allocated capacity of the vector.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate gapbuf; fn main() {
+    /// #
+    /// let mut buf = gap_buffer![1, 2, 3, 4];
+    /// buf.truncate(2);
+    /// assert_eq!(buf, [1, 2]);
+    /// #
+    /// # }
+    /// ```
     pub fn truncate(&mut self, len: usize) {
         if needs_drop::<T>() {
             while len < self.len {
