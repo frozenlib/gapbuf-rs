@@ -174,17 +174,15 @@ impl<T> GapBuffer<T> {
     }
     fn reserve_as(&mut self, additional: usize, exact: bool) {
         let len = self.len();
-        assert!(usize::max_value() - additional > len, "capacity overflow");
-        let old_cap = self.capacity();
-        if len + additional <= old_cap {
+        let old_cap = self.cap;
+        let new_cap = len.checked_add(additional).expect("capacity overflow");
+        if new_cap <= old_cap {
             return;
         }
         let new_cap = if exact {
-            len + additional
-        } else if usize::max_value() / 2 < old_cap {
-            usize::max_value()
+            new_cap
         } else {
-            max(old_cap * 2, len + additional)
+            max(old_cap.saturating_mul(2), new_cap)
         };
         self.0.realloc(new_cap);
 
