@@ -502,40 +502,30 @@ impl<T> RawGapBuffer<T> {
         if old_cap == new_cap {
             return;
         }
-        unsafe {
-            let value_size = size_of::<T>();
-            if value_size != 0 {
-                let p = if new_cap == 0 {
-                    let p = self.as_ptr() as *mut u8;
-                    dealloc(p, Self::get_layout(old_cap));
+        if size_of::<T>() != 0 {
+            unsafe {
+                let old_layout = Self::get_layout(old_cap);
+                let new_layout = Self::get_layout(new_cap);
+                let p = self.0.ptr.as_ptr() as *mut u8;
+                self.0.ptr = if new_cap == 0 {
+                    dealloc(p, old_layout);
                     NonNull::dangling()
                 } else {
-                    if usize::max_value() / value_size < new_cap {
-                        panic!("memory size overflow");
-                    }
-                    let p = if old_cap == 0 {
-                        alloc(Self::get_layout(new_cap))
+                    NonNull::new(if old_cap == 0 {
+                        alloc(new_layout)
                     } else {
-                        let p = self.as_ptr() as *mut u8;
-                        let new_size = value_size * new_cap;
-                        realloc(p, Self::get_layout(old_cap), new_size)
-                    };
-                    if let Some(p) = NonNull::new(p as *mut T) {
-                        p
-                    } else {
-                        handle_alloc_error(Self::get_layout(new_cap))
-                    }
+                        realloc(p, old_layout, new_layout.size())
+                    } as *mut T).unwrap_or_else(|| handle_alloc_error(new_layout))
                 };
-                self.0.ptr = p;
             }
-            self.0.cap = new_cap;
         }
+        self.0.cap = new_cap;
     }
     fn get_layout(cap: usize) -> Layout {
-        Layout::from_size_align(size_of::<T>() * cap, align_of::<T>()).unwrap()
-    }
-    fn as_ptr(&self) -> *mut T {
-        self.0.ptr.as_ptr()
+        let new_size = size_of::<T>()
+            .checked_mul(cap)
+            .expect("memory size overflow");
+        Layout::from_size_align(new_size, align_of::<T>()).unwrap()
     }
 }
 impl<T> Drop for RawGapBuffer<T> {
