@@ -481,6 +481,8 @@ impl<T> GapBuffer<T> {
             }
         }
     }
+
+    /// Removes the first element and returns it, or None if the GapBuffer is empty.
     pub fn pop_front(&mut self) -> Option<T> {
         let len = self.len;
         match len {
@@ -488,6 +490,8 @@ impl<T> GapBuffer<T> {
             _ => Some(self.remove(0)),
         }
     }
+
+    /// Removes the last element and returns it, or None if the GapBuffer is empty.
     pub fn pop_back(&mut self) -> Option<T> {
         let len = self.len;
         match len {
@@ -495,7 +499,41 @@ impl<T> GapBuffer<T> {
             _ => Some(self.remove(len - 1)),
         }
     }
+
+    /// Creates a draining iterator that removes the specified range in the GapBuffer and yields the removed items.
+    ///
+    /// Note 1: The element range is removed even if the iterator is only partially consumed or not consumed at all.
+    /// Note 2: It is unspecified how many elements are removed from the GapBuffer if the Drain value is leaked.
+    ///
+    /// # Panics
+    /// Panics if the `range` is out of GapBuffer.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate gapbuf; fn main() {
+    /// #
+    /// let mut buf = gap_buffer![1, 2, 3, 4];
+    ///
+    /// let d : Vec<_> = buf.drain(1..3).collect();
+    /// assert_eq!(buf, [1, 4]);
+    /// assert_eq!(d, [2, 3]);
+    ///
+    /// buf.drain(..);
+    /// assert_eq!(buf.is_empty(), true);
+    /// #
+    /// # }
+    /// ```
+    pub fn drain(&mut self, range: impl RangeBounds<usize>) -> Drain<T> {
+        let (idx, len) = self.to_idx_len(range);
+        Drain {
+            buf: self,
+            idx,
+            len,
+        }
+    }
 }
+impl<'a, T> ExactSizeIterator for Drain<'a, T> {}
 
 impl<T> GapBuffer<T>
 where
@@ -749,22 +787,41 @@ impl<T> Slice<T> {
         }
     }
     fn to_idx_len(&self, range: impl RangeBounds<usize>) -> (usize, usize) {
-        fn to_excluded(range: Bound<&usize>, default_value: usize, len: usize) -> usize {
-            use std::ops::Bound::*;
-            const MAX: usize = usize::max_value();
-            let value = match range {
-                Included(&idx) => idx,
-                Excluded(&MAX) => panic!("attempted to index slice up to maximum usize"),
-                Excluded(&idx) => idx + 1,
-                Unbounded => default_value,
-            };
-            if value > len {
-                panic!("index {} out of range for slice of length {}", value, len);
-            }
-            value
+        // fn to_excluded(range: Bound<&usize>, default_value: usize, len: usize) -> usize {
+        //     let value = match range {
+        //         Included(&idx) => idx,
+        //         Excluded(&MAX) => panic!("attempted to index slice up to maximum usize"),
+        //         Excluded(&idx) => idx + 1,
+        //         Unbounded => default_value,
+        //     };
+        //     if value > len {
+        //         panic!("index {} out of range for slice of length {}", value, len);
+        //     }
+        //     value
+        // }
+        use std::ops::Bound::*;
+        const MAX: usize = usize::max_value();
+        let len = self.len;
+        let idx = match range.start_bound() {
+            Included(&idx) => idx,
+            Excluded(&MAX) => panic!("attempted to index slice up to maximum usize"),
+            Excluded(&idx) => idx + 1,
+            Unbounded => 0,
+        };
+        if idx > len {
+            panic!("index {} out of range for slice of length {}", idx, len);
         }
-        let idx = to_excluded(range.start_bound(), 0, self.len);
-        let end = to_excluded(range.end_bound(), self.len, self.len);
+
+        let end = match range.end_bound() {
+            Included(&MAX) => panic!("attempted to index slice up to maximum usize"),
+            Included(&idx) => idx + 1,
+            Excluded(&idx) => idx,
+            Unbounded => len,
+        };
+        if end > len {
+            panic!("index {} out of range for slice of length {}", end, len);
+        }
+
         if end < idx {
             panic!("slice index starts at {} but ends at {}", idx, end);
         }
@@ -1208,5 +1265,30 @@ impl<'a, T> IntoIterator for &'a mut Slice<T> {
     type IntoIter = IterMut<'a, T>;
     fn into_iter(self) -> IterMut<'a, T> {
         self.iter_mut()
+    }
+}
+
+pub struct Drain<'a, T: 'a> {
+    buf: &'a mut GapBuffer<T>,
+    idx: usize,
+    len: usize,
+}
+impl<'a, T> Iterator for Drain<'a, T> {
+    type Item = T;
+    fn next(&mut self) -> Option<T> {
+        if self.len == 0 {
+            None
+        } else {
+            self.len -= 1;
+            Some(self.buf.remove(self.idx))
+        }
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
+    }
+}
+impl<'a, T> Drop for Drain<'a, T> {
+    fn drop(&mut self) {
+        while self.next().is_some() {}
     }
 }
