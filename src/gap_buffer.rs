@@ -85,7 +85,8 @@ impl<T> GapBuffer<T> {
     /// ```
     ///
     /// ```
-    /// # use gapbuf::GapBuffer;
+    /// use gapbuf::GapBuffer;
+    ///
     /// let mut buf = GapBuffer::new();
     /// buf.push_back(5);
     /// ```
@@ -98,8 +99,9 @@ impl<T> GapBuffer<T> {
     ///
     /// # Examples
     /// ```
-    /// let buf = gapbuf::GapBuffer::<i32>::with_capacity(5);
+    /// use gapbuf::GapBuffer;
     ///
+    /// let buf: GapBuffer<i32> = GapBuffer::with_capacity(5);
     /// assert_eq!(buf.is_empty(), true);
     /// assert_eq!(buf.len(), 0);
     /// assert_eq!(buf.capacity(), 5);
@@ -110,11 +112,12 @@ impl<T> GapBuffer<T> {
         buf
     }
 
-    /// Returns the number of elements the `GapBuffer` can hold without reallocating.
+    /// Returns the number of elements the `GapBuffer<T>` can hold without reallocating.
     ///
     /// # Examples
     /// ```
-    /// # use gapbuf::GapBuffer;
+    /// use gapbuf::GapBuffer;
+    ///
     /// let buf: GapBuffer<i32> = GapBuffer::with_capacity(10);
     /// assert_eq!(buf.capacity(), 10);
     /// ```
@@ -133,7 +136,8 @@ impl<T> GapBuffer<T> {
     ///
     /// # Examples
     /// ```
-    /// # use gapbuf::GapBuffer;
+    /// use gapbuf::GapBuffer;
+    ///
     /// let mut buf = GapBuffer::new();
     /// buf.push_back(1);
     /// buf.reserve(10);
@@ -147,17 +151,24 @@ impl<T> GapBuffer<T> {
     /// After calling reserve_exact, capacity will be greater than or equal to self.len() + additional.
     /// Does nothing if the capacity is already sufficient.
     ///
+    /// Note that the allocator may give the collection more space than it requests.
+    /// Therefore capacity can not be relied upon to be precisely minimal.
+    /// Prefer [`reserve`] if future insertions are expected.
+    ///
     /// # Panics
     /// Panics if the new capacity overflows usize.
     ///
     /// # Examples
     /// ```
-    /// # use gapbuf::GapBuffer;
+    /// use gapbuf::GapBuffer;
+    ///
     /// let mut buf = GapBuffer::new();
     /// buf.push_back(1);
     /// buf.reserve_exact(10);
     /// assert!(buf.capacity() >= 11);
     /// ```
+    ///
+    /// [`reserve`]: #method.reserve
     pub fn reserve_exact(&mut self, additional: usize) {
         self.reserve_as(additional, true);
     }
@@ -184,16 +195,32 @@ impl<T> GapBuffer<T> {
         }
     }
 
-    /// Shrinks the capacity of the GapBuffer as much as possible.
+    /// Shrinks the capacity of the `GapBuffer<T>` as much as possible.
+    ///
+    /// # Examples
+    /// ```
+    /// # use gapbuf::GapBuffer;
+    /// let mut buf = GapBuffer::new();
+    /// buf.push_back(1);
+    /// buf.reserve(10);
+    /// buf.shrink_to_fit();
+    /// assert_eq!(buf.capacity(), 1);
+    /// ```
     pub fn shrink_to_fit(&mut self) {
         let len = self.len();
         self.set_gap(len);
         self.0.realloc(len);
     }
 
-    /// Set gap offset.
+    /// Set gap offset of the `GapBuffer<T>`.
     ///
-    /// This operation is O((gap-self.gap()).abs()).
+    /// # Postcondition
+    /// `self.gap() == gap`
+    ///
+    /// # Computational amount
+    /// `O(gap - self.gap())`
+    ///
+    /// $ 10^8 $
     #[inline]
     pub fn set_gap(&mut self, gap: usize) {
         assert!(gap <= self.len());
@@ -223,16 +250,17 @@ impl<T> GapBuffer<T> {
     }
 
     #[inline]
-    pub fn set_gap_with_reserve(&mut self, gap: usize, additional: usize) {
+    fn set_gap_with_reserve(&mut self, gap: usize, additional: usize) {
         self.reserve(additional);
         self.set_gap(gap);
     }
 
     /// Inserts an element at position index within the `GapBuffer<T>`.
-    /// This operation is O((index-self.gap()).abs())
+    ///
+    /// This operation is `O((index-self.gap()).abs())`.
     ///
     /// # Panics
-    /// Panics if index > len.
+    /// Panics if `index > len`.
     #[inline]
     pub fn insert(&mut self, index: usize, element: T) {
         assert!(index <= self.len());
