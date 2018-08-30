@@ -197,7 +197,8 @@ impl<T> GapBuffer<T> {
     ///
     /// # Examples
     /// ```
-    /// # use gapbuf::GapBuffer;
+    /// use gapbuf::GapBuffer;
+    ///
     /// let mut buf = GapBuffer::new();
     /// buf.push_back(1);
     /// buf.reserve(10);
@@ -212,13 +213,11 @@ impl<T> GapBuffer<T> {
 
     /// Set gap offset of the `GapBuffer<T>`.
     ///
-    /// # Postcondition
-    /// `self.gap() == gap`
+    /// # Panics
+    /// Panics if `index > len`.
     ///
     /// # Computational amount
-    /// `O(gap - self.gap())`
-    ///
-    /// $ 10^8 $
+    /// `O(n)` , `n = |self.gap() - gap|`
     #[inline]
     pub fn set_gap(&mut self, gap: usize) {
         assert!(gap <= self.len());
@@ -241,7 +240,7 @@ impl<T> GapBuffer<T> {
         }
     }
 
-    /// Returns the number of gap offset.
+    /// Return gap offset of the `GapBuffer<T>`.
     #[inline]
     pub fn gap(&self) -> usize {
         self.gap
@@ -255,10 +254,11 @@ impl<T> GapBuffer<T> {
 
     /// Inserts an element at position index within the `GapBuffer<T>`.
     ///
-    /// This operation is `O((index-self.gap()).abs())`.
-    ///
     /// # Panics
     /// Panics if `index > len`.
+    ///
+    /// # Computational amount
+    /// `O(n)` , `n = |index - self.gap()|`
     #[inline]
     pub fn insert(&mut self, index: usize, element: T) {
         assert!(index <= self.len());
