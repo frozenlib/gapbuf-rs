@@ -2,7 +2,7 @@ use std::alloc::*;
 use std::cmp::*;
 use std::fmt::{Debug, Error, Formatter};
 use std::hash::*;
-use std::iter::FromIterator;
+use std::iter::*;
 use std::marker::PhantomData;
 use std::mem::*;
 use std::ops::*;
@@ -533,7 +533,6 @@ impl<T> GapBuffer<T> {
         }
     }
 }
-impl<'a, T> ExactSizeIterator for Drain<'a, T> {}
 
 impl<T> GapBuffer<T>
 where
@@ -1167,6 +1166,7 @@ impl<'a, T: 'a> Iterator for Iter<'a, T> {
     }
 }
 impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
+impl<'a, T: 'a> FusedIterator for Iter<'a, T> {}
 
 pub struct IterMut<'a, T: 'a> {
     s: &'a mut Slice<T>,
@@ -1191,6 +1191,7 @@ impl<'a, T: 'a> Iterator for IterMut<'a, T> {
     }
 }
 impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
+impl<'a, T: 'a> FusedIterator for IterMut<'a, T> {}
 
 pub struct IntoIter<T> {
     buf: GapBuffer<T>,
@@ -1207,6 +1208,7 @@ impl<T> Iterator for IntoIter<T> {
     }
 }
 impl<T> ExactSizeIterator for IntoIter<T> {}
+impl<T> FusedIterator for IntoIter<T> {}
 
 impl<T> IntoIterator for GapBuffer<T> {
     type Item = T;
@@ -1289,6 +1291,10 @@ impl<'a, T> Iterator for Drain<'a, T> {
 }
 impl<'a, T> Drop for Drain<'a, T> {
     fn drop(&mut self) {
-        while self.next().is_some() {}
+        let len = self.len;
+        self.nth(len);
     }
 }
+
+impl<'a, T> ExactSizeIterator for Drain<'a, T> {}
+impl<'a, T> FusedIterator for Drain<'a, T> {}
