@@ -72,7 +72,7 @@ fn eq_slice1() {
     let mut buf = GapBuffer::new();
     buf.push_back(1);
 
-    assert_eq!(buf, [1][..]);
+    assert_eq!(buf, [1]);
 }
 
 #[test]
@@ -81,7 +81,7 @@ fn eq_slice2() {
     buf.push_back(2);
     buf.push_back(8);
 
-    assert_eq!(buf, [2, 8][..]);
+    assert_eq!(buf, [2, 8]);
 }
 
 #[test]
@@ -138,7 +138,7 @@ fn set_gap_to_head() {
 
     buf.set_gap(0);
     assert_eq!(buf.gap(), 0);
-    assert_eq!(buf, [1, 2, 3, 4][..]);
+    assert_eq!(buf, [1, 2, 3, 4]);
 }
 
 #[test]
@@ -148,16 +148,16 @@ fn set_gap_to_tail() {
 
     buf.set_gap(4);
     assert_eq!(buf.gap(), 4);
-    assert_eq!(buf, [1, 2, 3, 4][..]);
+    assert_eq!(buf, [1, 2, 3, 4]);
 }
 
 #[test]
 fn set_gap_many() {
     let mut buf = gap_buffer![1, 2, 3, 4];
-    assert_eq!(buf, [1, 2, 3, 4][..]);
+    assert_eq!(buf, [1, 2, 3, 4]);
 
     buf.reserve(10);
-    assert_eq!(buf, [1, 2, 3, 4][..]);
+    assert_eq!(buf, [1, 2, 3, 4]);
 
     let mut gaps = Vec::new();
 
@@ -166,7 +166,7 @@ fn set_gap_many() {
         gaps.push(gap);
         buf.set_gap(gap);
         assert_eq!(buf.gap(), gap, "gaps: {:?}", &gaps);
-        assert_eq!(buf, [1, 2, 3, 4][..], "gaps: {:?}", &gaps);
+        assert_eq!(buf, [1, 2, 3, 4], "gaps: {:?}", &gaps);
     }
 }
 #[test]
@@ -175,7 +175,7 @@ fn set_gap_out_of_range() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
 
-    assert_eq!(buf, [1, 2, 3, 4][..]);
+    assert_eq!(buf, [1, 2, 3, 4]);
     buf.set_gap(5);
 }
 
@@ -186,7 +186,7 @@ fn isnert_before_gap() {
     buf.set_gap(3);
 
     buf.insert(1, 9);
-    assert_eq!(buf, [1, 9, 2, 3, 4][..]);
+    assert_eq!(buf, [1, 9, 2, 3, 4]);
 }
 
 #[test]
@@ -196,7 +196,7 @@ fn isnert_before_gap_near() {
     buf.set_gap(3);
 
     buf.insert(2, 9);
-    assert_eq!(buf, [1, 2, 9, 3, 4][..]);
+    assert_eq!(buf, [1, 2, 9, 3, 4]);
 }
 
 #[test]
@@ -206,7 +206,7 @@ fn insert_after_gap() {
     buf.set_gap(1);
 
     buf.insert(3, 9);
-    assert_eq!(buf, [1, 2, 3, 9, 4][..]);
+    assert_eq!(buf, [1, 2, 3, 9, 4]);
 }
 #[test]
 fn insert_after_gap_near() {
@@ -215,7 +215,7 @@ fn insert_after_gap_near() {
     buf.set_gap(1);
 
     buf.insert(2, 9);
-    assert_eq!(buf, [1, 2, 9, 3, 4][..]);
+    assert_eq!(buf, [1, 2, 9, 3, 4]);
 }
 
 #[test]
@@ -225,7 +225,7 @@ fn insert_at_gap() {
     buf.set_gap(1);
 
     buf.insert(1, 9);
-    assert_eq!(buf, [1, 9, 2, 3, 4][..]);
+    assert_eq!(buf, [1, 9, 2, 3, 4]);
 }
 
 #[test]
@@ -241,7 +241,7 @@ fn remove_before_gap() {
     buf.reserve(10);
     buf.set_gap(2);
     buf.remove(0);
-    assert_eq!(buf, [2, 3, 4][..]);
+    assert_eq!(buf, [2, 3, 4]);
 }
 
 #[test]
@@ -250,7 +250,7 @@ fn remove_before_gap_near() {
     buf.reserve(10);
     buf.set_gap(2);
     buf.remove(1);
-    assert_eq!(buf, [1, 3, 4][..]);
+    assert_eq!(buf, [1, 3, 4]);
 }
 
 #[test]
@@ -259,7 +259,7 @@ fn remove_after_gap() {
     buf.reserve(10);
     buf.set_gap(2);
     buf.remove(3);
-    assert_eq!(buf, [1, 2, 3][..]);
+    assert_eq!(buf, [1, 2, 3]);
 }
 #[test]
 fn remove_after_gap_near() {
@@ -267,7 +267,7 @@ fn remove_after_gap_near() {
     buf.reserve(10);
     buf.set_gap(2);
     buf.remove(2);
-    assert_eq!(buf, [1, 2, 4][..]);
+    assert_eq!(buf, [1, 2, 4]);
 }
 
 #[test]
@@ -276,6 +276,15 @@ fn remove_out_of_range() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
     buf.remove(4);
+}
+
+#[test]
+fn swap_remove() {
+    let mut buf = gap_buffer![1, 2, 3, 4, 5];
+    buf.set_gap(5);
+    let value = buf.swap_remove(0);
+    assert_eq!(value, 1);
+    assert_eq!(buf, [5, 2, 3, 4]);
 }
 
 #[test]
