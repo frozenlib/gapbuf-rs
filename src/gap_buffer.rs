@@ -315,6 +315,7 @@ impl<T> GapBuffer<T> {
     ///
     /// # Panics
     /// Panics if a or b are out of bounds.
+    #[inline]
     pub fn swap(&mut self, a: usize, b: usize) {
         let oa = self.get_offset(a);
         let ob = self.get_offset(b);
