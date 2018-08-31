@@ -639,12 +639,14 @@ impl<T> Drop for RawGapBuffer<T> {
 // Range, RangeMut
 ////////////////////////////////////////////////////////////////////////////////
 
+/// Immutable reference to [`Slice`].
 #[derive(Hash)]
 pub struct Range<'a, T: 'a> {
     s: Slice<T>,
     _phantom: PhantomData<&'a [T]>,
 }
 
+/// Mutable reference to [`Slice`].
 #[derive(Hash)]
 pub struct RangeMut<'a, T: 'a> {
     s: Slice<T>,
@@ -719,6 +721,7 @@ impl<'a, T> Clone for Range<'a, T> {
 // Slice
 ////////////////////////////////////////////////////////////////////////////////
 
+/// Sub-range of [`GapBuffer`].
 pub struct Slice<T> {
     ptr: NonNull<T>,
     cap: usize,
@@ -858,15 +861,6 @@ impl<T> Slice<T> {
         }
     }
 
-    #[inline]
-    pub fn as_slice(&self) -> &Self {
-        self
-    }
-
-    #[inline]
-    pub fn as_mut_slice(&mut self) -> &mut Self {
-        self
-    }
     pub fn iter(&self) -> Iter<T> {
         Iter { s: self, idx: 0 }
     }
