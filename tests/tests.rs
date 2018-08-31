@@ -27,46 +27,6 @@ fn with_capacity() {
 }
 
 #[test]
-fn push_back1() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(9);
-
-    assert_eq!(buf.len(), 1);
-    assert_eq!(buf[0], 9);
-}
-
-#[test]
-fn push_back2() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(9);
-    buf.push_back(12);
-
-    assert_eq!(buf.len(), 2);
-    assert_eq!(buf[0], 9);
-    assert_eq!(buf[1], 12);
-}
-
-#[test]
-fn push_front1() {
-    let mut buf = GapBuffer::new();
-    buf.push_front(9);
-
-    assert_eq!(buf.len(), 1);
-    assert_eq!(buf[0], 9);
-}
-
-#[test]
-fn push_front2() {
-    let mut buf = GapBuffer::new();
-    buf.push_front(9);
-    buf.push_front(12);
-
-    assert_eq!(buf.len(), 2);
-    assert_eq!(buf[0], 12);
-    assert_eq!(buf[1], 9);
-}
-
-#[test]
 fn from_iter() {
     let buf: GapBuffer<_> = vec![8, 12, 9].into_iter().collect();
 
@@ -348,6 +308,53 @@ fn insert_each() {
             }
         }
     }
+}
+
+#[test]
+fn insert_iter() {
+    let mut b = gap_buffer![1, 2, 3, 4];
+    b.insert_iter(2, vec![10, 11]);
+    assert_eq!(b, [1, 2, 10, 11, 3, 4]);
+}
+
+#[test]
+fn push_back1() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(9);
+
+    assert_eq!(buf.len(), 1);
+    assert_eq!(buf[0], 9);
+}
+
+#[test]
+fn push_back2() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(9);
+    buf.push_back(12);
+
+    assert_eq!(buf.len(), 2);
+    assert_eq!(buf[0], 9);
+    assert_eq!(buf[1], 12);
+}
+
+#[test]
+fn push_front1() {
+    let mut buf = GapBuffer::new();
+    buf.push_front(9);
+
+    assert_eq!(buf.len(), 1);
+    assert_eq!(buf[0], 9);
+}
+
+#[test]
+fn push_front2() {
+    let mut buf = GapBuffer::new();
+    buf.push_front(9);
+    buf.push_front(12);
+
+    assert_eq!(buf.len(), 2);
+    assert_eq!(buf[0], 12);
+    assert_eq!(buf[1], 9);
 }
 
 #[test]
