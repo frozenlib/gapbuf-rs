@@ -592,13 +592,8 @@ impl<T: Clone> Clone for GapBuffer<T> {
 }
 impl<T> Extend<T> for GapBuffer<T> {
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
-        let iter = iter.into_iter();
-        let len = self.len();
-        self.set_gap_with_reserve(len, iter.size_hint().0);
-
-        for value in iter {
-            self.push_back(value);
-        }
+        let len = self.len;
+        self.insert_iter(len, iter);
     }
 }
 impl<'a, T: 'a + Copy> Extend<&'a T> for GapBuffer<T> {
