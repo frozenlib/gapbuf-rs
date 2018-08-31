@@ -331,6 +331,26 @@ fn insert_out_of_range() {
 }
 
 #[test]
+fn insert_each() {
+    let e0 = vec![1, 2, 3, 4];
+    let b0 = gap_buffer![1, 2, 3, 4];
+
+    for i in 0..5 {
+        let mut e1 = e0.clone();
+        e1.insert(i, 5);
+        for r in 0..2 {
+            for g in 0..5 {
+                let mut b1 = b0.clone();
+                b1.reserve_exact(r);
+                b1.set_gap(g);
+                b1.insert(i, 5);
+                assert_eq!(b1, e1);
+            }
+        }
+    }
+}
+
+#[test]
 fn remove_before_gap() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
