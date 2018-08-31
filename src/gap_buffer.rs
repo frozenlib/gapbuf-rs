@@ -764,6 +764,14 @@ impl<T> Slice<T> {
         self.len() == 0
     }
 
+    pub fn get(&self, index: usize) -> Option<&T> {
+        if self.len < index {
+            None
+        } else {
+            unsafe { Some(&*self.as_ptr().add(self.get_offset(index))) }
+        }
+    }
+
     pub fn range(&self, range: impl RangeBounds<usize>) -> Range<T> {
         unsafe { Range::new(self.range_slice(range)) }
     }
