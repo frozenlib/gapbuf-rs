@@ -455,6 +455,22 @@ fn swap_remove() {
 }
 
 #[test]
+fn swap() {
+    let e0 = vec![1, 2, 3, 4, 5];
+    let b0 = gap_buffer![1, 2, 3, 4, 5];
+
+    for i in 0..5 {
+        for j in 0..5 {
+            let mut e1 = e0.clone();
+            let mut b1 = b0.clone();
+            e1.swap(i, j);
+            b1.swap(i, j);
+            assert_eq!(b1, e1);
+        }
+    }
+}
+
+#[test]
 #[should_panic]
 fn index_out_of_range() {
     let mut buf = gap_buffer![1, 2, 3, 4];

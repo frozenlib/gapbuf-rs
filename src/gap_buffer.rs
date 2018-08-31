@@ -323,23 +323,6 @@ impl<T> GapBuffer<T> {
         self.len += 1;
     }
 
-    /// Swaps two elements in the GapBuffer.
-    ///
-    /// # Arguments
-    ///
-    /// * a - The index of the first element
-    /// * b - The index of the second element
-    ///
-    /// # Panics
-    /// Panics if `a >= self.len()` or `b >= self.len()`.
-    #[inline]
-    pub fn swap(&mut self, a: usize, b: usize) {
-        let oa = self.get_offset(a);
-        let ob = self.get_offset(b);
-        let p = self.as_mut_ptr();
-        unsafe { ptr::swap(p.add(oa), p.add(ob)) }
-    }
-
     /// Removes an element from the GapBuffer and returns it.
     ///
     /// The removed element is replaced by the near the gap.
@@ -780,6 +763,23 @@ impl<T> Slice<T> {
             let o = self.get_offset(index);
             unsafe { Some(&mut *p.add(o)) }
         }
+    }
+
+    /// Swaps two elements in the GapBuffer.
+    ///
+    /// # Arguments
+    ///
+    /// * a - The index of the first element
+    /// * b - The index of the second element
+    ///
+    /// # Panics
+    /// Panics if `a >= self.len()` or `b >= self.len()`.
+    #[inline]
+    pub fn swap(&mut self, a: usize, b: usize) {
+        let oa = self.get_offset(a);
+        let ob = self.get_offset(b);
+        let p = self.as_mut_ptr();
+        unsafe { ptr::swap(p.add(oa), p.add(ob)) }
     }
 
     pub fn range(&self, range: impl RangeBounds<usize>) -> Range<T> {
