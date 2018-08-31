@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+xs 191850951 1749145256 3997859186 3421913040 # shrinks to a = RangeArg { len: 0, reserve: 1, gap: 0, begin: 0, end: 0 }

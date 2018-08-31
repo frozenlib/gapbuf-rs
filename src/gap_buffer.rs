@@ -799,25 +799,13 @@ impl<T> Slice<T> {
         };
 
         Slice {
-            ptr: NonNull::new(self.ptr.as_ptr().add(idx - gap_remove)).unwrap(),
+            ptr: NonNull::new(self.ptr.as_ptr().add(idx + gap_remove)).unwrap(),
             cap: self.cap - (self.len - len + gap_remove),
             gap,
             len,
         }
     }
     fn to_idx_len(&self, range: impl RangeBounds<usize>) -> (usize, usize) {
-        // fn to_excluded(range: Bound<&usize>, default_value: usize, len: usize) -> usize {
-        //     let value = match range {
-        //         Included(&idx) => idx,
-        //         Excluded(&MAX) => panic!("attempted to index slice up to maximum usize"),
-        //         Excluded(&idx) => idx + 1,
-        //         Unbounded => default_value,
-        //     };
-        //     if value > len {
-        //         panic!("index {} out of range for slice of length {}", value, len);
-        //     }
-        //     value
-        // }
         use std::ops::Bound::*;
         const MAX: usize = usize::max_value();
         let len = self.len;

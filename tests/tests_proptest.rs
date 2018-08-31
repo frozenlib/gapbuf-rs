@@ -25,10 +25,9 @@ fn vec_actions_strategy() -> impl Strategy<Value = Vec<VecAction>> {
     proptest::collection::vec(action, 0..100)
 }
 
-proptest!{
-
+proptest! {
     #[test]
-    fn prop_insert_remove(actions in vec_actions_strategy()) {
+    fn insert_remove(actions in vec_actions_strategy()) {
         use self::VecAction::*;
 
         let mut e = Vec::new();
@@ -58,4 +57,42 @@ proptest!{
             assert_eq!(a, e);
         }
     }
+}
+#[derive(Debug)]
+struct RangeArg {
+    len: usize,
+    reserve: usize,
+    gap: usize,
+    begin: usize,
+    end: usize,
+}
+fn range_arg_strategy() -> impl Strategy<Value = RangeArg> {
+    (0..10usize)
+        .prop_flat_map(|len| (Just(len), 0..=len))
+        .prop_flat_map(|(len, begin)| (Just(len), Just(begin), begin..=len, 0..=len, 0..2usize))
+        .prop_map(|(len, begin, end, gap, reserve)| RangeArg {
+            len,
+            begin,
+            end,
+            gap,
+            reserve,
+        })
+}
+proptest! {
+    #[test]
+    fn range(a in range_arg_strategy()) {
+        let b: GapBuffer<_> = (0..a.len).collect();
+        let mut b = b.clone();
+        b.reserve_exact(a.reserve);
+        b.set_gap(a.gap);
+
+        let e: Vec<_> = b
+            .iter()
+            .cloned()
+            .skip(a.begin)
+            .take(a.end - a.begin)
+            .collect();
+        prop_assert_eq!(b.range(a.begin..a.end), e);
+    }
+
 }

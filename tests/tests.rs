@@ -464,7 +464,7 @@ fn clear() {
 }
 
 #[test]
-fn truncate_t_nocopy() {
+fn truncate_t_is_not_copy() {
     for l in 0..4 {
         for t in 0..=l {
             let e: Vec<_> = (0..l).map(|x| x.to_string()).collect();
@@ -487,7 +487,7 @@ fn truncate_t_nocopy() {
 }
 
 #[test]
-fn truncate_t_copy() {
+fn truncate_t_is_copy() {
     for l in 0..4 {
         for t in 0..=l {
             let e: Vec<_> = (0..l).collect();
@@ -510,55 +510,47 @@ fn truncate_t_copy() {
 }
 
 #[test]
-#[should_panic]
-fn index_out_of_range() {
-    let mut buf = gap_buffer![1, 2, 3, 4];
-    buf.reserve(10);
-    buf[4];
+fn retain() {
+    let mut b = gap_buffer![1, 2, 3, 4];
+    b.retain(|&x| x % 2 == 0);
+    assert_eq!(b, [2, 4]);
 }
 
 #[test]
-fn from_iter() {
-    let buf: GapBuffer<_> = vec![8, 12, 9].into_iter().collect();
-
-    assert_eq!(buf.len(), 3);
-    assert_eq!(buf[0], 8);
-    assert_eq!(buf[1], 12);
-    assert_eq!(buf[2], 9);
+fn pop_front() {
+    let b = gap_buffer![1, 2, 3];
+    for g in 0..3 {
+        let mut b = b.clone();
+        b.set_gap(g);
+        assert_eq!(b.pop_front(), Some(1));
+        assert_eq!(b, [2, 3]);
+    }
 }
 
 #[test]
-fn eq_slice1() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(1);
-
-    assert_eq!(buf, [1]);
+fn pop_back() {
+    let b = gap_buffer![1, 2, 3];
+    for g in 0..3 {
+        let mut b = b.clone();
+        b.set_gap(g);
+        assert_eq!(b.pop_back(), Some(3));
+        assert_eq!(b, [1, 2]);
+    }
 }
 
 #[test]
-fn eq_slice2() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(2);
-    buf.push_back(8);
+fn drain() {
+    let b = gap_buffer![1, 2, 3, 4];
+    for g in 0..5 {
+        let mut b = b.clone();
+        b.set_gap(g);
+        let d: Vec<_> = b.drain(1..3).collect();
+        assert_eq!(d, [2, 3]);
+        assert_eq!(b, [1, 4]);
 
-    assert_eq!(buf, [2, 8]);
-}
-
-#[test]
-fn eq_gapbuf1() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(1);
-
-    assert_eq!(buf, gap_buffer![1]);
-}
-
-#[test]
-fn eq_gapbuf2() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(2);
-    buf.push_back(8);
-
-    assert_eq!(buf, gap_buffer![2, 8]);
+        b.drain(..);
+        assert_eq!(b.is_empty(), true);
+    }
 }
 
 struct TestDrop<'a> {
@@ -592,6 +584,20 @@ impl<'a> Drop for TestDrop<'a> {
             panic!("in drop panic!");
         }
     }
+}
+
+#[test]
+fn impl_sync() {
+    fn f(_: impl Sync) {}
+    let buf = GapBuffer::<usize>::new();
+    f(buf);
+}
+
+#[test]
+fn impl_send() {
+    fn f(_: impl Send) {}
+    let buf = GapBuffer::<usize>::new();
+    f(buf);
 }
 
 #[test]
@@ -651,6 +657,143 @@ fn drop_all_on_panic2() {
 }
 
 #[test]
+fn eq_slice1() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(1);
+
+    assert_eq!(buf, [1]);
+}
+
+#[test]
+fn eq_slice2() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(2);
+    buf.push_back(8);
+
+    assert_eq!(buf, [2, 8]);
+}
+
+#[test]
+fn eq_gapbuf1() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(1);
+
+    assert_eq!(buf, gap_buffer![1]);
+}
+
+#[test]
+fn eq_gapbuf2() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(2);
+    buf.push_back(8);
+
+    assert_eq!(buf, gap_buffer![2, 8]);
+}
+
+#[test]
+fn ord() {
+    use std::cmp::Ordering::*;
+    assert!(gap_buffer![1] < [2]);
+    assert!(gap_buffer![2] > [1]);
+    assert_eq!(gap_buffer![1].partial_cmp(&[1]), Some(Equal));
+
+    assert!(gap_buffer![1, 1] > [1]);
+    assert!(gap_buffer![1] < [1, 1]);
+
+    assert!(gap_buffer![2, 1] > [1, 1]);
+    assert!(gap_buffer![1, 1] < [2, 1]);
+
+    assert!(gap_buffer![2, 1] > [1, 2]);
+    assert!(gap_buffer![1, 2] < [2, 1]);
+}
+
+#[test]
+fn index() {
+    for r in 0..2 {
+        for g in 0..5 {
+            let mut b = gap_buffer![1, 2, 3, 4];
+            b.reserve_exact(r);
+            b.set_gap(g);
+
+            assert_eq!(b[0], 1);
+            assert_eq!(b[1], 2);
+            assert_eq!(b[2], 3);
+            assert_eq!(b[3], 4);
+        }
+    }
+}
+
+#[test]
+#[should_panic]
+fn index_out_of_range() {
+    let mut buf = gap_buffer![1, 2, 3, 4];
+    buf.reserve(10);
+    buf[4];
+}
+
+#[test]
+fn iter() {
+    for r in 0..2 {
+        for g in 0..5 {
+            let mut b = gap_buffer![1, 2, 3, 4];
+            b.reserve_exact(r);
+            b.set_gap(g);
+
+            let mut i = b.iter();
+            assert_eq!(i.next(), Some(&1));
+            assert_eq!(i.next(), Some(&2));
+            assert_eq!(i.next(), Some(&3));
+            assert_eq!(i.next(), Some(&4));
+            assert_eq!(i.next(), None);
+        }
+    }
+}
+
+#[test]
+fn range() {
+    let b = gap_buffer![1, 2, 3, 4, 5];
+    for r in 0..2 {
+        for g in 0..=b.len() {
+            let mut b = b.clone();
+            b.reserve_exact(r);
+            b.set_gap(g);
+
+            for begin in 0..=b.len() {
+                for end in begin..=b.len() {
+                    let e: Vec<_> = b.iter().cloned().skip(begin).take(end - begin).collect();
+                    assert_eq!(b.range(begin..end), e);
+                }
+            }
+        }
+    }
+}
+#[test]
+#[should_panic]
+fn range_bad() {
+    let b = gap_buffer![1, 2];
+    b.range(2..1);
+}
+
+#[test]
+#[should_panic]
+fn range_begin_out_of_range() {
+    let b = gap_buffer![1, 2];
+    b.range(3..4);
+}
+
+// covariant
+
+#[test]
+fn from_iter() {
+    let buf: GapBuffer<_> = vec![8, 12, 9].into_iter().collect();
+
+    assert_eq!(buf.len(), 3);
+    assert_eq!(buf[0], 8);
+    assert_eq!(buf[1], 12);
+    assert_eq!(buf[2], 9);
+}
+
+#[test]
 fn zero_sized_type() {
     let mut buf = GapBuffer::new();
     buf.push_back(());
@@ -658,18 +801,4 @@ fn zero_sized_type() {
 
     assert_eq!((), buf[0]);
     assert_eq!((), buf[1]);
-}
-
-#[test]
-fn impl_sync() {
-    fn f(_: impl Sync) {}
-    let buf = GapBuffer::<usize>::new();
-    f(buf);
-}
-
-#[test]
-fn impl_send() {
-    fn f(_: impl Send) {}
-    let buf = GapBuffer::<usize>::new();
-    f(buf);
 }
