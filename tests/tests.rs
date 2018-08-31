@@ -781,7 +781,32 @@ fn range_begin_out_of_range() {
     b.range(3..4);
 }
 
-// covariant
+#[test]
+fn covariant() {
+    let mut b: GapBuffer<&'static str> = GapBuffer::new();
+    b.push_back("aaa");
+    let s = String::from("bbb");
+
+    // `&GapBuffer<&static str>` can conert `&GapBuffer<&a>`
+    fn c_gapbuf<'a>(_buf: &GapBuffer<&'a str>, _s: &'a str) {}
+    c_gapbuf(&b, &s);
+
+    // `Range<'b, &'static str>` can convert  `Range<'b, &'a str>`
+    fn c_range<'a, 'b>(_buf: gapbuf::Range<'b, &'a str>, _s: &'a str) {}
+    c_range(b.range(0..1), &s);
+
+    // `Range<'b, &'static str>` can not convert  `Range<'b, &'a str>`
+    // fn c_range_mut<'a, 'b>(_buf: gapbuf::RangeMut<'b, &'a str>, _s: &'a str) {}
+    // c_range_mut(b.range_mut(0..1), &s);
+
+    // `&Slice<&static str>` can conert `&Slice<&a>`
+    fn c_slice<'a>(_buf: &gapbuf::Slice<&'a str>, _s: &'a str) {}
+    c_slice(&b, &s);
+
+    // `&mut Slice<&static str>` can not conert `&mut Slice<&a>`
+    // fn c_mut_slice<'a>(_buf: &mut gapbuf::Slice<&'a str>, _s: &'a str) {}
+    // c_mut_slice(&mut b, &s);
+}
 
 #[test]
 fn from_iter() {
