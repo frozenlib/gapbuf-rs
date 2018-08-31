@@ -977,17 +977,13 @@ impl<T> Index<usize> for Slice<T> {
 
     #[inline]
     fn index(&self, index: usize) -> &T {
-        let p = self.as_ptr();
-        let o = self.get_offset(index);
-        unsafe { &*p.add(o) }
+        self.get(index).expect("index out of bounds")
     }
 }
 impl<T> IndexMut<usize> for Slice<T> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
-        let p = self.as_mut_ptr();
-        let o = self.get_offset(index);
-        unsafe { &mut *p.add(o) }
+        self.get_mut(index).expect("index out of bounds")
     }
 }
 
