@@ -27,50 +27,6 @@ fn with_capacity() {
 }
 
 #[test]
-fn from_iter() {
-    let buf: GapBuffer<_> = vec![8, 12, 9].into_iter().collect();
-
-    assert_eq!(buf.len(), 3);
-    assert_eq!(buf[0], 8);
-    assert_eq!(buf[1], 12);
-    assert_eq!(buf[2], 9);
-}
-
-#[test]
-fn eq_slice1() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(1);
-
-    assert_eq!(buf, [1]);
-}
-
-#[test]
-fn eq_slice2() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(2);
-    buf.push_back(8);
-
-    assert_eq!(buf, [2, 8]);
-}
-
-#[test]
-fn eq_gapbuf1() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(1);
-
-    assert_eq!(buf, gap_buffer![1]);
-}
-
-#[test]
-fn eq_gapbuf2() {
-    let mut buf = GapBuffer::new();
-    buf.push_back(2);
-    buf.push_back(8);
-
-    assert_eq!(buf, gap_buffer![2, 8]);
-}
-
-#[test]
 fn reserve() {
     let mut buf = GapBuffer::<u32>::new();
     buf.reserve(4);
@@ -298,7 +254,7 @@ fn insert_each() {
     for i in 0..5 {
         let mut e1 = e0.clone();
         e1.insert(i, 5);
-        for r in 0..2 {
+        for r in 0..3 {
             for g in 0..5 {
                 let mut b1 = b0.clone();
                 b1.reserve_exact(r);
@@ -329,15 +285,18 @@ fn insert_iter_each() {
     let e0 = vec![1, 2, 3, 4];
     let b0 = gap_buffer![1, 2, 3, 4];
 
-    for i in 0..5 {
-        let mut e1 = e0.clone();
-        e1.insert(i, 10);
-        e1.insert(i + 1, 11);
-        for g in 0..5 {
-            let mut b1 = b0.clone();
-            b1.set_gap(g);
-            b1.insert_iter(i, vec![10, 11]);
-            assert_eq!(b1, e1);
+    for r in 0..3 {
+        for i in 0..5 {
+            let mut e1 = e0.clone();
+            e1.insert(i, 10);
+            e1.insert(i + 1, 11);
+            for g in 0..5 {
+                let mut b1 = b0.clone();
+                b1.reserve_exact(r);
+                b1.set_gap(g);
+                b1.insert_iter(i, vec![10, 11]);
+                assert_eq!(b1, e1);
+            }
         }
     }
 }
@@ -364,11 +323,14 @@ fn push_back2() {
 
 #[test]
 fn push_back_each() {
-    for g in 0..3 {
-        let mut b = gap_buffer![0, 1, 2];
-        b.set_gap(g);
-        b.push_back(3);
-        assert_eq!(b, [0, 1, 2, 3]);
+    for r in 0..3 {
+        for g in 0..3 {
+            let mut b = gap_buffer![0, 1, 2];
+            b.reserve_exact(r);
+            b.set_gap(g);
+            b.push_back(3);
+            assert_eq!(b, [0, 1, 2, 3]);
+        }
     }
 }
 
@@ -394,11 +356,14 @@ fn push_front2() {
 
 #[test]
 fn push_front_each() {
-    for g in 0..3 {
-        let mut b = gap_buffer![0, 1, 2];
-        b.set_gap(g);
-        b.push_front(9);
-        assert_eq!(b, [9, 0, 1, 2]);
+    for r in 0..3 {
+        for g in 0..3 {
+            let mut b = gap_buffer![0, 1, 2];
+            b.reserve_exact(r);
+            b.set_gap(g);
+            b.push_front(9);
+            assert_eq!(b, [9, 0, 1, 2]);
+        }
     }
 }
 
@@ -447,11 +412,25 @@ fn remove_out_of_range() {
 
 #[test]
 fn swap_remove() {
-    let mut buf = gap_buffer![1, 2, 3, 4, 5];
-    buf.set_gap(5);
-    let value = buf.swap_remove(0);
-    assert_eq!(value, 1);
-    assert_eq!(buf, [5, 2, 3, 4]);
+    let e0 = vec![1, 2, 3, 4, 5];
+    let b0 = gap_buffer![1, 2, 3, 4, 5];
+    for i in 0..5 {
+        let mut e1 = e0.clone();
+        e1.remove(i);
+
+        for r in 0..3 {
+            for g in 0..6 {
+                let mut b1 = b0.clone();
+                b1.reserve_exact(r);
+                b1.set_gap(g);
+                b1.swap_remove(i);
+
+                let mut b1: Vec<_> = b1.into_iter().collect();
+                b1.sort();
+                assert_eq!(b1, e1);
+            }
+        }
+    }
 }
 
 #[test]
@@ -463,9 +442,69 @@ fn swap() {
         for j in 0..5 {
             let mut e1 = e0.clone();
             let mut b1 = b0.clone();
+            b1.reserve(2);
             e1.swap(i, j);
             b1.swap(i, j);
             assert_eq!(b1, e1);
+        }
+    }
+}
+
+#[test]
+fn clear() {
+    for r in 0..3 {
+        for g in 0..5 {
+            let mut b = gap_buffer![1, 2, 3, 4];
+            b.reserve_exact(r);
+            b.set_gap(g);
+            b.clear();
+            assert_eq!(b.is_empty(), true);
+        }
+    }
+}
+
+#[test]
+fn truncate_t_nocopy() {
+    for l in 0..4 {
+        for t in 0..=l {
+            let e: Vec<_> = (0..l).map(|x| x.to_string()).collect();
+            let b: GapBuffer<_> = (0..l).map(|x| x.to_string()).collect();
+
+            for r in 0..3 {
+                for g in 0..=l {
+                    let mut e = e.clone();
+                    let mut b = b.clone();
+
+                    b.reserve_exact(r);
+                    b.set_gap(g);
+                    b.truncate(t);
+                    e.truncate(t);
+                    assert_eq!(b, e, "l = {}, t = {}, r = {}, g = {}", l, t, r, g);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn truncate_t_copy() {
+    for l in 0..4 {
+        for t in 0..=l {
+            let e: Vec<_> = (0..l).collect();
+            let b: GapBuffer<_> = (0..l).collect();
+
+            for r in 0..3 {
+                for g in 0..=l {
+                    let mut e = e.clone();
+                    let mut b = b.clone();
+
+                    b.reserve_exact(r);
+                    b.set_gap(g);
+                    b.truncate(t);
+                    e.truncate(t);
+                    assert_eq!(b, e, "l = {}, t = {}, r = {}, g = {}", l, t, r, g);
+                }
+            }
         }
     }
 }
@@ -476,6 +515,50 @@ fn index_out_of_range() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
     buf[4];
+}
+
+#[test]
+fn from_iter() {
+    let buf: GapBuffer<_> = vec![8, 12, 9].into_iter().collect();
+
+    assert_eq!(buf.len(), 3);
+    assert_eq!(buf[0], 8);
+    assert_eq!(buf[1], 12);
+    assert_eq!(buf[2], 9);
+}
+
+#[test]
+fn eq_slice1() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(1);
+
+    assert_eq!(buf, [1]);
+}
+
+#[test]
+fn eq_slice2() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(2);
+    buf.push_back(8);
+
+    assert_eq!(buf, [2, 8]);
+}
+
+#[test]
+fn eq_gapbuf1() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(1);
+
+    assert_eq!(buf, gap_buffer![1]);
+}
+
+#[test]
+fn eq_gapbuf2() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(2);
+    buf.push_back(8);
+
+    assert_eq!(buf, gap_buffer![2, 8]);
 }
 
 struct TestDrop<'a> {

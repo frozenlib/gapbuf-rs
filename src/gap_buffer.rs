@@ -437,10 +437,12 @@ impl<T> GapBuffer<T> {
                 self.remove(index);
             }
         } else {
-            if len < self.len {
-                self.len = len;
-                self.gap = min(self.gap, len);
+            if self.gap < len {
+                self.set_gap(len);
+            } else {
+                self.gap = len;
             }
+            self.len = len;
         }
     }
 
