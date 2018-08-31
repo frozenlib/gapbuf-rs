@@ -286,7 +286,11 @@ impl<T> GapBuffer<T> {
     pub fn insert_iter(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
         assert!(index <= self.len());
         let iter = iter.into_iter();
-        self.set_gap_with_reserve(index, iter.size_hint().0);
+        let hint = iter.size_hint();
+        if let Some(0) = hint.1 {
+            return;
+        }
+        self.set_gap_with_reserve(index, hint.0);
         for value in iter {
             self.insert(index, value);
             index += 1;
