@@ -318,6 +318,31 @@ fn insert_iter() {
 }
 
 #[test]
+#[should_panic]
+fn insert_iter_out_of_range() {
+    let mut buf = gap_buffer![1, 2, 3, 4];
+    buf.insert_iter(5, vec![1, 2]);
+}
+
+#[test]
+fn insert_iter_each() {
+    let e0 = vec![1, 2, 3, 4];
+    let b0 = gap_buffer![1, 2, 3, 4];
+
+    for i in 0..5 {
+        let mut e1 = e0.clone();
+        e1.insert(i, 10);
+        e1.insert(i + 1, 11);
+        for g in 0..5 {
+            let mut b1 = b0.clone();
+            b1.set_gap(g);
+            b1.insert_iter(i, vec![10, 11]);
+            assert_eq!(b1, e1);
+        }
+    }
+}
+
+#[test]
 fn push_back1() {
     let mut buf = GapBuffer::new();
     buf.push_back(9);
@@ -338,6 +363,16 @@ fn push_back2() {
 }
 
 #[test]
+fn push_back_each() {
+    for g in 0..3 {
+        let mut b = gap_buffer![0, 1, 2];
+        b.set_gap(g);
+        b.push_back(3);
+        assert_eq!(b, [0, 1, 2, 3]);
+    }
+}
+
+#[test]
 fn push_front1() {
     let mut buf = GapBuffer::new();
     buf.push_front(9);
@@ -355,6 +390,16 @@ fn push_front2() {
     assert_eq!(buf.len(), 2);
     assert_eq!(buf[0], 12);
     assert_eq!(buf[1], 9);
+}
+
+#[test]
+fn push_front_each() {
+    for g in 0..3 {
+        let mut b = gap_buffer![0, 1, 2];
+        b.set_gap(g);
+        b.push_front(9);
+        assert_eq!(b, [9, 0, 1, 2]);
+    }
 }
 
 #[test]
