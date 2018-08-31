@@ -16,6 +16,15 @@ fn new() {
     assert_eq!(buf.gap(), 0);
     assert_eq!(buf.capacity(), 0);
 }
+#[test]
+fn with_capacity() {
+    let buf = GapBuffer::<u32>::with_capacity(10);
+
+    assert_eq!(buf.is_empty(), true);
+    assert_eq!(buf.len(), 0);
+    assert_eq!(buf.gap(), 0);
+    assert!(buf.capacity() >= 10);
+}
 
 #[test]
 fn push_back1() {
@@ -132,6 +141,78 @@ fn push_back_reserve() {
 }
 
 #[test]
+fn reserve_exact() {
+    let mut buf = GapBuffer::<u32>::new();
+    buf.reserve_exact(4);
+
+    assert!(buf.capacity() >= 4);
+    assert_eq!(buf.len(), 0);
+}
+
+#[test]
+fn reserve_exact_push_back() {
+    let mut buf = GapBuffer::new();
+    buf.reserve_exact(4);
+    buf.push_back(8);
+
+    assert_eq!(buf.len(), 1);
+    assert_eq!(buf[0], 8);
+}
+
+#[test]
+fn push_back_reserve_exact() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(8);
+
+    buf.reserve_exact(4);
+    assert_eq!(buf.len(), 1);
+    assert_eq!(buf[0], 8);
+    assert!(buf.capacity() >= 5);
+}
+
+#[test]
+fn shrink_to_fit_0() {
+    let mut buf: GapBuffer<u32> = GapBuffer::new();
+    buf.reserve(10);
+    buf.shrink_to_fit();
+
+    assert_eq!(buf.capacity(), 0);
+}
+
+#[test]
+fn shrink_to_fit_1() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(1);
+    buf.reserve(10);
+    buf.shrink_to_fit();
+
+    assert_eq!(buf.capacity(), 1);
+    assert_eq!(buf, [1]);
+}
+
+#[test]
+fn shrink_to_fit_gap_head() {
+    let mut buf = GapBuffer::new();
+    buf.push_back(1);
+    buf.reserve(10);
+    buf.set_gap(0);
+    buf.shrink_to_fit();
+
+    assert_eq!(buf.capacity(), 1);
+    assert_eq!(buf, [1]);
+}
+#[test]
+fn shrink_to_fit_gap_mid() {
+    let mut buf = gap_buffer![1, 2];
+    buf.reserve(10);
+    buf.set_gap(1);
+    buf.shrink_to_fit();
+
+    assert_eq!(buf.capacity(), 2);
+    assert_eq!(buf, [1, 2]);
+}
+
+#[test]
 fn set_gap_to_head() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
@@ -166,7 +247,7 @@ fn set_gap_many() {
         gaps.push(gap);
         buf.set_gap(gap);
         assert_eq!(buf.gap(), gap, "gaps: {:?}", &gaps);
-        assert_eq!(buf, [1, 2, 3, 4], "gaps: {:?}", &gaps);
+        assert_eq!(buf, [1, 2, 3, 4]);
     }
 }
 #[test]
@@ -177,6 +258,20 @@ fn set_gap_out_of_range() {
 
     assert_eq!(buf, [1, 2, 3, 4]);
     buf.set_gap(5);
+}
+
+#[test]
+fn set_gap_each() {
+    let buf0 = gap_buffer![1, 2, 3, 4];
+
+    for i in 0..5 {
+        for j in 0..5 {
+            let mut buf1 = buf0.clone();
+            buf1.set_gap(i);
+            buf1.set_gap(j);
+            assert_eq!(buf1, buf0);
+        }
+    }
 }
 
 #[test]
