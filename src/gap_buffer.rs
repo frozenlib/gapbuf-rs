@@ -64,7 +64,7 @@ macro_rules! gap_buffer {
 
 /// Dynamic array that allows efficient insertion and deletion operations clustered near the same location.
 ///
-/// `GapBuffer` has a member similer to `Vec`.
+/// `GapBuffer<T>` has a member similer to `Vec`.
 #[derive(Hash)]
 pub struct GapBuffer<T>(RawGapBuffer<T>);
 
