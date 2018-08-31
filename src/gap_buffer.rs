@@ -772,6 +772,17 @@ impl<T> Slice<T> {
         }
     }
 
+    #[inline]
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
+        if self.len < index {
+            None
+        } else {
+            let p = self.as_mut_ptr();
+            let o = self.get_offset(index);
+            unsafe { Some(&mut *p.add(o)) }
+        }
+    }
+
     pub fn range(&self, range: impl RangeBounds<usize>) -> Range<T> {
         unsafe { Range::new(self.range_slice(range)) }
     }
