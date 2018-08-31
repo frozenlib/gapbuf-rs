@@ -764,6 +764,7 @@ impl<T> Slice<T> {
         self.len() == 0
     }
 
+    #[inline]
     pub fn get(&self, index: usize) -> Option<&T> {
         if self.len < index {
             None
