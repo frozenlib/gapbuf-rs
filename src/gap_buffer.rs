@@ -287,9 +287,25 @@ impl<T> GapBuffer<T> {
         assert!(index <= self.len());
         let mut iter = iter.into_iter();
         if let Some(value) = iter.next() {
-            self.set_gap_with_reserve(index, iter.size_hint().0 + 1);
-            self.insert(index, value);
-            index += 1;
+            let min_len = iter.size_hint().0;
+            self.set_gap_with_reserve(index, min_len + 1);
+            let p = self.as_mut_ptr();
+            unsafe {
+                write(p.add(index), value);
+                self.gap += 1;
+                self.len += 1;
+                index += 1;
+                for _ in 0..min_len {
+                    if let Some(value) = iter.next() {
+                        write(p.add(index), value);
+                        self.gap += 1;
+                        self.len += 1;
+                        index += 1;
+                    } else {
+                        return;
+                    }
+                }
+            }
             for value in iter {
                 self.insert(index, value);
                 index += 1;
