@@ -2,7 +2,7 @@
 Generic gap buffer implementation in Rust.
 
 This crate provides the type `GapBuffer`.
-This type has a member similer to `Vec`.
+This type has methods similar to `Vec`.
 
 ## Example
 

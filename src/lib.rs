@@ -1,5 +1,5 @@
 //! `gapbuf` provides the type [`GapBuffer`].
-//! `GapBuffer` has a member similer to `Vec`.
+//! `GapBuffer` has methods similar to `Vec`.
 //!
 //! # Examples
 //!
