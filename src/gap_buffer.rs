@@ -494,7 +494,7 @@ impl<T> GapBuffer<T> {
     /// Note 2: It is unspecified how many elements are removed from the GapBuffer if the Drain value is leaked.
     ///
     /// # Panics
-    /// Panics if the `range` is out of GapBuffer.
+    /// Panics if the `range` is out of bounds.
     ///
     /// # Examples
     ///
@@ -792,9 +792,48 @@ impl<T> Slice<T> {
         unsafe { ptr::swap(p.add(oa), p.add(ob)) }
     }
 
+    /// Return a immutable sub-range of this Slice.
+    ///
+    /// # Panics
+    /// Panics if `range` is out of bounds.
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate gapbuf; fn main() {
+    /// #
+    /// let buf = gap_buffer![1, 2, 3, 4, 5];
+    ///
+    /// let r1 = buf.range(1..);
+    /// assert_eq!(r1, [2, 3, 4, 5]);
+    ///
+    /// let r2 = r1.range(1..3);
+    /// assert_eq!(r2, [3, 4]);
+    /// #
+    /// # }
+    /// ```
     pub fn range(&self, range: impl RangeBounds<usize>) -> Range<T> {
         unsafe { Range::new(self.range_slice(range)) }
     }
+
+    /// Return a mutable sub-range of this Slice.
+    ///
+    /// # Panics
+    /// Panics if `range` is out of bounds.
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate gapbuf; fn main() {
+    /// #
+    /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
+    /// {
+    ///     let mut r = buf.range_mut(1..);
+    ///     assert_eq!(r, [2, 3, 4, 5]);
+    ///     r[0] = 0;
+    /// }
+    /// assert_eq!(buf, [1, 0, 3, 4, 5]);
+    /// #
+    /// # }
+    /// ```
     pub fn range_mut(&mut self, range: impl RangeBounds<usize>) -> RangeMut<T> {
         unsafe { RangeMut::new(self.range_slice(range)) }
     }
@@ -843,6 +882,21 @@ impl<T> Slice<T> {
         (idx, end - idx)
     }
 
+    /// Returns a pair of slices.
+    /// First slice is before gap. Second slice is after gap.
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate gapbuf; fn main() {
+    /// #
+    /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
+    /// buf.set_gap(2);
+    /// let (s1, s2) = buf.as_slices();
+    /// assert_eq!(s1, [1, 2]);
+    /// assert_eq!(s2, [3, 4, 5]);
+    /// #
+    /// # }
+    /// ```
     pub fn as_slices(&self) -> (&[T], &[T]) {
         unsafe {
             let p0 = self.as_ptr();
@@ -854,6 +908,25 @@ impl<T> Slice<T> {
             )
         }
     }
+
+    /// Returns a pair of slices.
+    /// First slice is before gap. Second slice is after gap.
+    ///
+    /// # Examples
+    /// ```
+    /// # #[macro_use] extern crate gapbuf; fn main() {
+    /// #
+    /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
+    /// buf.set_gap(2);
+    /// {
+    ///     let (mut s1, mut s2) = buf.as_mut_slices();
+    ///     s1[0] = 10;
+    ///     s2[0] = 11;
+    /// }
+    /// assert_eq!(buf, [10, 2, 11, 4, 5]);
+    /// #
+    /// # }
+    /// ```
     pub fn as_mut_slices(&mut self) -> (&mut [T], &mut [T]) {
         unsafe {
             let p0 = self.as_mut_ptr();
@@ -866,9 +939,12 @@ impl<T> Slice<T> {
         }
     }
 
+    /// Returns an iterator over the Slice.
     pub fn iter(&self) -> Iter<T> {
         Iter { s: self, idx: 0 }
     }
+
+    /// Returns an iterator that allows modifying each value.
     pub fn iter_mut(&mut self) -> IterMut<T> {
         IterMut { s: self, idx: 0 }
     }
