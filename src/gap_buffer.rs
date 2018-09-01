@@ -286,16 +286,16 @@ impl<T> GapBuffer<T> {
     pub fn insert_iter(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
         assert!(index <= self.len());
         let mut iter = iter.into_iter();
+        let min_len = iter.size_hint().0;
         if let Some(value) = iter.next() {
-            let min_len = iter.size_hint().0;
-            self.set_gap_with_reserve(index, min_len + 1);
+            self.set_gap_with_reserve(index, max(min_len, 1));
             let p = self.as_mut_ptr();
             unsafe {
                 write(p.add(index), value);
                 self.gap += 1;
                 self.len += 1;
                 index += 1;
-                for _ in 0..min_len {
+                for _ in 1..min_len {
                     if let Some(value) = iter.next() {
                         write(p.add(index), value);
                         self.gap += 1;
