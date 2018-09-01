@@ -263,9 +263,6 @@ impl<T> GapBuffer<T> {
     ///
     /// # Computational amount
     /// `O(n)` , `n = |index - self.gap()|`
-    ///
-    /// # Postcondition
-    /// `self.gap() == index + 1`
     #[inline]
     pub fn insert(&mut self, index: usize, element: T) {
         assert!(index <= self.len());
@@ -285,9 +282,6 @@ impl<T> GapBuffer<T> {
     /// Panics if `index > len`.
     ///
     /// Panics if the number of elements in the gap buffer overflows a usize.
-    ///
-    /// # Postcondition
-    /// `self.gap() == index + iter.count()`
     #[inline]
     pub fn insert_iter(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
         assert!(index <= self.len());
