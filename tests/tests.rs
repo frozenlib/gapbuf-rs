@@ -275,6 +275,13 @@ fn insert_iter() {
 
 #[test]
 #[should_panic]
+fn insert_iter_overflow() {
+    let mut b = gap_buffer![1, 2, 3, 4];
+    b.insert_iter(0, std::iter::repeat(0));
+}
+
+#[test]
+#[should_panic]
 fn insert_iter_out_of_range() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.insert_iter(5, vec![1, 2]);
