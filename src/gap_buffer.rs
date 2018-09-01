@@ -283,7 +283,6 @@ impl<T> GapBuffer<T> {
     /// Panics if `index > len`.
     ///
     /// Panics if the number of elements in the gap buffer overflows a usize.
-    #[inline]
     pub fn insert_iter(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
         assert!(index <= self.len());
         let mut iter = iter.into_iter();
