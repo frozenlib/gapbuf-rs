@@ -941,12 +941,14 @@ impl<T> Slice<T> {
 
     /// Returns an iterator over the Slice.
     pub fn iter(&self) -> Iter<T> {
-        Iter { s: self, idx: 0 }
+        let (s0, s1) = self.as_slices();
+        s0.iter().chain(s1.iter())
     }
 
     /// Returns an iterator that allows modifying each value.
     pub fn iter_mut(&mut self) -> IterMut<T> {
-        IterMut { s: self, idx: 0 }
+        let (s0, s1) = self.as_mut_slices();
+        s0.iter_mut().chain(s1.iter_mut())
     }
 
     #[inline]
@@ -1223,54 +1225,8 @@ impl<T: Ord> Ord for Slice<T> {
 // iterator
 ////////////////////////////////////////////////////////////////////////////////
 
-pub struct Iter<'a, T: 'a> {
-    s: &'a Slice<T>,
-    idx: usize,
-}
-impl<'a, T: 'a> Iterator for Iter<'a, T> {
-    type Item = &'a T;
-
-    fn next(&mut self) -> Option<&'a T> {
-        if self.idx == self.s.len {
-            None
-        } else {
-            let i = self.idx;
-            self.idx += 1;
-            Some(&self.s[i])
-        }
-    }
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = self.s.len - self.idx;
-        (len, Some(len))
-    }
-}
-impl<'a, T: 'a> ExactSizeIterator for Iter<'a, T> {}
-impl<'a, T: 'a> FusedIterator for Iter<'a, T> {}
-
-pub struct IterMut<'a, T: 'a> {
-    s: &'a mut Slice<T>,
-    idx: usize,
-}
-impl<'a, T: 'a> Iterator for IterMut<'a, T> {
-    type Item = &'a mut T;
-
-    fn next(&mut self) -> Option<&'a mut T> {
-        if self.idx == self.s.len {
-            None
-        } else {
-            let p = self.s.as_mut_ptr();
-            let o = self.s.get_offset(self.idx);
-            self.idx += 1;
-            unsafe { Some(&mut *p.add(o)) }
-        }
-    }
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        let len = self.s.len - self.idx;
-        (len, Some(len))
-    }
-}
-impl<'a, T: 'a> ExactSizeIterator for IterMut<'a, T> {}
-impl<'a, T: 'a> FusedIterator for IterMut<'a, T> {}
+pub type Iter<'a, T> = Chain<slice::Iter<'a, T>, slice::Iter<'a, T>>;
+pub type IterMut<'a, T> = Chain<slice::IterMut<'a, T>, slice::IterMut<'a, T>>;
 
 pub struct IntoIter<T> {
     buf: GapBuffer<T>,
@@ -1288,6 +1244,11 @@ impl<T> Iterator for IntoIter<T> {
 }
 impl<T> ExactSizeIterator for IntoIter<T> {}
 impl<T> FusedIterator for IntoIter<T> {}
+impl<T> DoubleEndedIterator for IntoIter<T> {
+    fn next_back(&mut self) -> Option<T> {
+        self.buf.pop_back()
+    }
+}
 
 impl<T> IntoIterator for GapBuffer<T> {
     type Item = T;
