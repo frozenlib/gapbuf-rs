@@ -708,30 +708,6 @@ fn ord() {
 }
 
 #[test]
-fn index() {
-    for r in 0..2 {
-        for g in 0..5 {
-            let mut b = gap_buffer![1, 2, 3, 4];
-            b.reserve_exact(r);
-            b.set_gap(g);
-
-            assert_eq!(b[0], 1);
-            assert_eq!(b[1], 2);
-            assert_eq!(b[2], 3);
-            assert_eq!(b[3], 4);
-        }
-    }
-}
-
-#[test]
-#[should_panic]
-fn index_out_of_range() {
-    let mut buf = gap_buffer![1, 2, 3, 4];
-    buf.reserve(10);
-    buf[4];
-}
-
-#[test]
 fn iter() {
     for r in 0..2 {
         for g in 0..5 {
@@ -779,6 +755,53 @@ fn range_bad() {
 fn range_begin_out_of_range() {
     let b = gap_buffer![1, 2];
     b.range(3..4);
+}
+
+#[test]
+fn index() {
+    for r in 0..2 {
+        for g in 0..5 {
+            let mut b = gap_buffer![1, 2, 3, 4];
+            b.reserve_exact(r);
+            b.set_gap(g);
+
+            assert_eq!(b[0], 1);
+            assert_eq!(b[1], 2);
+            assert_eq!(b[2], 3);
+            assert_eq!(b[3], 4);
+        }
+    }
+}
+
+#[test]
+#[should_panic]
+fn index_out_of_range() {
+    let mut buf = gap_buffer![1, 2, 3, 4];
+    buf.reserve(10);
+    buf[4];
+}
+
+#[test]
+fn get() {
+    let b = gap_buffer![1, 2, 3, 4, 5];
+    let v = vec![1, 2, 3, 4, 5];
+    for r in 0..2 {
+        for g in 0..5 {
+            let mut b = b.clone();
+            b.reserve_exact(r);
+            b.set_gap(g);
+            for i in 0..7 {
+                assert_eq!(b.get(i), v.get(i));
+            }
+        }
+    }
+}
+
+#[test]
+fn get_mut() {
+    let mut b = gap_buffer![1, 2, 3, 4, 5];
+    *b.get_mut(2).unwrap() = 9;
+    assert_eq!(b, [1, 2, 9, 4, 5]);
 }
 
 #[test]

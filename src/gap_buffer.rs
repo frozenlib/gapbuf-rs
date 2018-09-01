@@ -639,14 +639,14 @@ impl<T> Drop for RawGapBuffer<T> {
 // Range, RangeMut
 ////////////////////////////////////////////////////////////////////////////////
 
-/// Immutable reference to [`Slice`].
+/// Immutable sub-range of [`GapBuffer`]
 #[derive(Hash)]
 pub struct Range<'a, T: 'a> {
     s: Slice<T>,
     _phantom: PhantomData<&'a [T]>,
 }
 
-/// Mutable reference to [`Slice`].
+/// Mutable sub-range of [`GapBuffer`].
 #[derive(Hash)]
 pub struct RangeMut<'a, T: 'a> {
     s: Slice<T>,
@@ -661,6 +661,7 @@ impl<'a, T: 'a> Range<'a, T> {
         }
     }
 
+    /// Construct a new, empty `Range`.
     #[inline]
     pub fn empty() -> Self {
         unsafe { Range::new(Slice::empty()) }
@@ -675,6 +676,7 @@ impl<'a, T: 'a> RangeMut<'a, T> {
         }
     }
 
+    /// Construct a new, empty `RangeMut`.
     #[inline]
     pub fn empty() -> Self {
         unsafe { RangeMut::new(Slice::empty()) }
@@ -729,6 +731,7 @@ pub struct Slice<T> {
     len: usize,
 }
 impl<T> Slice<T> {
+    /// Construct a new, empty `Slice`.
     pub fn empty() -> Self {
         Slice {
             ptr: NonNull::dangling(),
@@ -750,18 +753,20 @@ impl<T> Slice<T> {
         self.len() == 0
     }
 
+    /// Returns a reference to an element at index or None if out of bounds.
     #[inline]
     pub fn get(&self, index: usize) -> Option<&T> {
-        if self.len < index {
+        if self.len <= index {
             None
         } else {
             unsafe { Some(&*self.as_ptr().add(self.get_offset(index))) }
         }
     }
 
+    /// Returns a mutable reference to an element at index or None if out of bounds.
     #[inline]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
-        if self.len < index {
+        if self.len <= index {
             None
         } else {
             let p = self.as_mut_ptr();
