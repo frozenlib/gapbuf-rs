@@ -123,3 +123,30 @@ fn collect_deque(b: &mut Bencher) {
         b
     });
 }
+
+#[bench]
+fn iter_vec(b: &mut Bencher) {
+    let s: Vec<_> = (0..100000).collect();
+    b.iter(|| {
+        let s: usize = s.iter().sum();
+        s
+    });
+}
+
+#[bench]
+fn iter_gapbuf(b: &mut Bencher) {
+    let s: GapBuffer<_> = (0..100000).collect();
+    b.iter(|| {
+        let s: usize = s.iter().sum();
+        s
+    });
+}
+
+#[bench]
+fn iter_gdeque(b: &mut Bencher) {
+    let s: VecDeque<_> = (0..100000).collect();
+    b.iter(|| {
+        let s: usize = s.iter().sum();
+        s
+    });
+}
