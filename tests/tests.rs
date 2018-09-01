@@ -553,6 +553,32 @@ fn drain() {
     }
 }
 
+#[test]
+fn splice() {
+    for len in 0..5 {
+        for len_insert in 0..3 {
+            for begin in 0..=len {
+                for end in begin..=len {
+                    let mut e: Vec<_> = (0..len).collect();
+                    let er: Vec<_> = e.splice(begin..end, 10..10 + len_insert).collect();
+                    for g in 0..=len {
+                        for r in 0..2 {
+                            let mut b: GapBuffer<_> = (0..len).collect();
+                            b.reserve(r);
+                            b.set_gap(g);
+
+                            let br: Vec<_> = b.splice(begin..end, 10..10 + len_insert).collect();
+
+                            assert_eq!(br, er, "removed list");
+                            assert_eq!(b, e, "new list");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 struct TestDrop<'a> {
     t: &'a RefCell<HashSet<&'a str>>,
     name: &'a str,

@@ -94,5 +94,50 @@ proptest! {
             .collect();
         prop_assert_eq!(b.range(a.begin..a.end), e);
     }
+}
 
+#[derive(Debug)]
+struct SpliceArg {
+    len: usize,
+    begin: usize,
+    end: usize,
+    gap: usize,
+    reserve: usize,
+    len_insert: usize,
+}
+fn splice_arg_strategy() -> impl Strategy<Value = SpliceArg> {
+    (0..10usize)
+        .prop_flat_map(|len| (Just(len), 0..=len))
+        .prop_flat_map(|(len, begin)| {
+            (
+                Just(len),
+                Just(begin),
+                begin..=len,
+                0..=len,
+                0..2usize,
+                0..10usize,
+            )
+        }).prop_map(|(len, begin, end, gap, reserve, len_insert)| SpliceArg {
+            len,
+            begin,
+            end,
+            gap,
+            reserve,
+            len_insert,
+        })
+}
+proptest! {
+    #[test]
+    fn splice(a in splice_arg_strategy()) {
+        let mut e: Vec<_> = (0..a.len).collect();
+        let er: Vec<_> = e.splice(a.begin..a.end, 10..10 + a.len_insert).collect();
+
+        let mut b: GapBuffer<_> = (0..a.len).collect();
+        b.reserve(a.reserve);
+        b.set_gap(a.gap);
+
+        let br: Vec<_> = b.splice(a.begin..a.end, 10..10 + a.len_insert).collect();
+        assert_eq!(br, er, "removed list");
+        assert_eq!(b, e, "new list");
+    }
 }

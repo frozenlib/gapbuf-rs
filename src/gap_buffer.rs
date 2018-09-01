@@ -4,6 +4,7 @@ use std::fmt::{Debug, Error, Formatter};
 use std::hash::*;
 use std::iter::*;
 use std::marker::PhantomData;
+use std::mem;
 use std::mem::*;
 use std::ops::{Deref, DerefMut, Drop, FnMut, Index, IndexMut, RangeBounds};
 use std::ptr;
@@ -520,6 +521,99 @@ impl<T> GapBuffer<T> {
             len,
         }
     }
+
+    /// Creates a splicing iterator
+    /// that replaces the specified range in the GapBuffer with the given replace_with iterator and
+    /// yields the removed items.
+    /// replace_with does not need to be the same length as range.
+    ///
+    /// see [Vec::splice].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # #[macro_use] extern crate gapbuf; fn main() {
+    /// #
+    /// let mut b = gap_buffer![1, 2, 3, 4];
+    /// let r : Vec<_> = b.splice(1..3, vec![7, 8, 9]).collect();
+    ///
+    /// assert_eq!(b, [1, 7, 8, 9, 4]);
+    /// assert_eq!(r, [2, 3]);
+    /// #
+    /// # }
+    /// ```
+    pub fn splice<I: IntoIterator<Item = T>>(
+        &mut self,
+        range: impl RangeBounds<usize>,
+        replace_with: I,
+    ) -> Splice<T, I::IntoIter> {
+        let (idx, len) = self.to_idx_len(range);
+        Splice {
+            buf: self,
+            idx,
+            end: idx + len,
+            iter: replace_with.into_iter().fuse(),
+        }
+    }
+}
+
+/// A splicing iterator for [`GapBuffer`].
+pub struct Splice<'a, T: 'a, I: Iterator<Item = T>> {
+    buf: &'a mut GapBuffer<T>,
+    idx: usize,
+    end: usize,
+    iter: Fuse<I>,
+}
+impl<'a, T: 'a, I: Iterator<Item = T>> Iterator for Splice<'a, T, I> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<T> {
+        if self.idx < self.end {
+            if let Some(value) = self.iter.next() {
+                let value = mem::replace(&mut self.buf[self.idx], value);
+                self.idx += 1;
+                Some(value)
+            } else {
+                let value = self.buf.remove(self.idx);
+                self.end -= 1;
+                Some(value)
+            }
+        } else {
+            None
+        }
+    }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let size = self.end - self.idx;
+        (size, Some(size))
+    }
+}
+impl<'a, T: 'a, I: Iterator<Item = T>> Drop for Splice<'a, T, I> {
+    fn drop(&mut self) {
+        while self.next().is_some() {}
+
+        while let Some(value) = self.iter.next() {
+            self.buf.insert(self.idx, value);
+            self.idx += 1;
+        }
+    }
+}
+impl<'a, T: 'a, I: Iterator<Item = T>> ExactSizeIterator for Splice<'a, T, I> {}
+impl<'a, T: 'a, I: Iterator<Item = T>> FusedIterator for Splice<'a, T, I> {}
+impl<'a, T: 'a, I: DoubleEndedIterator<Item = T>> DoubleEndedIterator for Splice<'a, T, I> {
+    fn next_back(&mut self) -> Option<T> {
+        if self.idx < self.end {
+            let i = self.end - 1;
+            let value = if let Some(value) = self.iter.next_back() {
+                mem::replace(&mut self.buf[i], value)
+            } else {
+                self.buf.remove(i)
+            };
+            self.end -= 1;
+            Some(value)
+        } else {
+            None
+        }
+    }
 }
 
 impl<T> GapBuffer<T>
@@ -724,6 +818,7 @@ impl<'a, T> Clone for Range<'a, T> {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Sub-range of [`GapBuffer`].
+/// `Slice` define common method for [`GapBuffer`], [`Range`], [`RangeMut`].
 pub struct Slice<T> {
     ptr: NonNull<T>,
     cap: usize,
@@ -1236,9 +1331,13 @@ impl<T: Ord> Ord for Slice<T> {
 // iterator
 ////////////////////////////////////////////////////////////////////////////////
 
+/// Immutable GapBuffer iterator.
 pub type Iter<'a, T> = Chain<slice::Iter<'a, T>, slice::Iter<'a, T>>;
+
+/// Mutable GapBuffer iterator.
 pub type IterMut<'a, T> = Chain<slice::IterMut<'a, T>, slice::IterMut<'a, T>>;
 
+/// An iterator that moves out of a [`GapBuffer`].
 pub struct IntoIter<T> {
     buf: GapBuffer<T>,
 }
@@ -1321,6 +1420,7 @@ impl<'a, T> IntoIterator for &'a mut Slice<T> {
     }
 }
 
+/// A draining iterator for [`GapBuffer`].
 pub struct Drain<'a, T: 'a> {
     buf: &'a mut GapBuffer<T>,
     idx: usize,
