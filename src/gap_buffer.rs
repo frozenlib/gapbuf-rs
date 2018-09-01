@@ -839,15 +839,26 @@ impl<T> Slice<T> {
     }
     unsafe fn range_slice(&self, range: impl RangeBounds<usize>) -> Slice<T> {
         let (idx, len) = self.to_idx_len(range);
-        let (gap, gap_remove) = if idx < self.gap {
-            (self.gap - idx, 0)
+        if len == 0 {
+            return Slice::empty();
+        }
+
+        let gap_is_before = self.gap <= idx;
+        let gap_is_after = idx + len <= self.gap;
+
+        let gap = if gap_is_before {
+            0
+        } else if !gap_is_after {
+            self.gap - idx
         } else {
-            (0, self.gap_len())
+            len
         };
+        let begin = if gap_is_before { self.gap_len() } else { 0 } + idx;
+        let end = if !gap_is_after { self.gap_len() } else { 0 } + idx + len;
 
         Slice {
-            ptr: NonNull::new(self.ptr.as_ptr().add(idx + gap_remove)).unwrap(),
-            cap: self.cap - (self.len - len + gap_remove),
+            ptr: NonNull::new(self.ptr.as_ptr().add(begin)).unwrap(),
+            cap: end - begin,
             gap,
             len,
         }
