@@ -261,6 +261,7 @@ fn insert_each() {
                 b1.set_gap(g);
                 b1.insert(i, 5);
                 assert_eq!(b1, e1);
+                assert_eq!(b1.gap(), i + 1);
             }
         }
     }
@@ -271,6 +272,7 @@ fn insert_iter() {
     let mut b = gap_buffer![1, 2, 3, 4];
     b.insert_iter(2, vec![10, 11]);
     assert_eq!(b, [1, 2, 10, 11, 3, 4]);
+    assert_eq!(b.gap(), 4);
 }
 
 #[test]
