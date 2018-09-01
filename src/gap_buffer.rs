@@ -634,7 +634,7 @@ impl<T> GapBuffer<T>
 where
     T: Clone,
 {
-    /// Resize the `GapBuffer<T>` in-place so that 'len' is equal to 'new_len'.
+    /// Resize the `GapBuffer<T>` in-place so that `len` is equal to `new_len`.
     pub fn resize(&mut self, new_len: usize, value: T) {
         let old_len = self.len();
         if new_len < old_len {
@@ -724,7 +724,8 @@ impl<T> RawGapBuffer<T> {
                         alloc(new_layout)
                     } else {
                         realloc(p, old_layout, new_layout.size())
-                    } as *mut T).unwrap_or_else(|| handle_alloc_error(new_layout))
+                    } as *mut T)
+                        .unwrap_or_else(|| handle_alloc_error(new_layout))
                 };
             }
         }
@@ -1074,7 +1075,11 @@ impl<T> Slice<T> {
     #[inline]
     fn get_offset(&self, index: usize) -> usize {
         assert!(index < self.len);
-        index + if index < self.gap { 0 } else { self.gap_len() }
+        index + if index < self.gap {
+            0
+        } else {
+            self.gap_len()
+        }
     }
 
     #[inline]
