@@ -5,6 +5,8 @@ authors = ["FrozenLib <frozenlib@users.noreply.github.com>"]
 description = "Generic gap buffer."
 homepage = "https://github.com/frozenlib/gapbuf-rs"
 license = "MIT/Apache-2.0"
+keywords = ["gap", "gapbuffer"]
+categories = ["data-structures"]
 
 [dependencies]
 
