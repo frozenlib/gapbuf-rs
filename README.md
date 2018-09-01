@@ -1,4 +1,7 @@
 # gapbuf-rs
+
+[![Build Status](https://travis-ci.org/frozenlib/gapbuf-rs.svg?branch=master)](https://travis-ci.org/frozenlib/gapbuf-rs)
+
 Generic gap buffer implementation in Rust.
 
 This crate provides the type `GapBuffer`.
