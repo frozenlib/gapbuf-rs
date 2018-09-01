@@ -19,8 +19,6 @@
 //!
 //! ```
 
-#![feature(crate_in_paths)]
-
 #[macro_use]
 mod finally;
 
