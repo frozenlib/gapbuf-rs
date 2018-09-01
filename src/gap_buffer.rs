@@ -286,15 +286,15 @@ impl<T> GapBuffer<T> {
     #[inline]
     pub fn insert_iter(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
         assert!(index <= self.len());
-        let iter = iter.into_iter();
-        let hint = iter.size_hint();
-        if let Some(0) = hint.1 {
-            return;
-        }
-        self.set_gap_with_reserve(index, hint.0);
-        for value in iter {
+        let mut iter = iter.into_iter();
+        if let Some(value) = iter.next() {
+            self.set_gap_with_reserve(index, iter.size_hint().0 + 1);
             self.insert(index, value);
             index += 1;
+            for value in iter {
+                self.insert(index, value);
+                index += 1;
+            }
         }
     }
 
@@ -527,7 +527,10 @@ impl<T> GapBuffer<T> {
     /// yields the removed items.
     /// replace_with does not need to be the same length as range.
     ///
-    /// see [Vec::splice].
+    /// The element range is removed even if the iterator is not consumed until the end.
+    ///
+    /// This is optimal if the length of `range` is equal to the length of `replace_with`.
+    /// Otherwise, call [`GapBuffer::set_gap`] internally.
     ///
     /// # Examples
     ///
@@ -590,11 +593,7 @@ impl<'a, T: 'a, I: Iterator<Item = T>> Iterator for Splice<'a, T, I> {
 impl<'a, T: 'a, I: Iterator<Item = T>> Drop for Splice<'a, T, I> {
     fn drop(&mut self) {
         while self.next().is_some() {}
-
-        while let Some(value) = self.iter.next() {
-            self.buf.insert(self.idx, value);
-            self.idx += 1;
-        }
+        self.buf.insert_iter(self.idx, &mut self.iter);
     }
 }
 impl<'a, T: 'a, I: Iterator<Item = T>> ExactSizeIterator for Splice<'a, T, I> {}
