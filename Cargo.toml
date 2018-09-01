@@ -2,11 +2,16 @@
 name = "gapbuf"
 version = "0.1.0"
 authors = ["FrozenLib <frozenlib@users.noreply.github.com>"]
-description = "Generic gap buffer."
-homepage = "https://github.com/frozenlib/gapbuf-rs"
 license = "MIT/Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/frozenlib/gapbuf-rs"
+documentation = "https://frozenlib.github.io/rustdoc/gapbuf/0.1.0/gapbuf/"
 keywords = ["gap", "gapbuffer"]
 categories = ["data-structures"]
+description = "Generic gap buffer."
+
+[badges]
+travis-ci = { repository = "frozenlib/gapbuf-rs" }
 
 [dependencies]
 
