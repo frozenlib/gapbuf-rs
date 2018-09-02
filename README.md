@@ -1,7 +1,8 @@
 # gapbuf-rs
 
-[![Build Status](https://travis-ci.org/frozenlib/gapbuf-rs.svg?branch=master)](https://travis-ci.org/frozenlib/gapbuf-rs)
+[![Crates.io](https://img.shields.io/crates/v/gapbuf.svg)](https://crates.io/crates/gapbuf)
 [![Docs.rs](https://docs.rs/gapbuf/badge.svg)](https://docs.rs/crate/gapbuf)
+[![Build Status](https://travis-ci.org/frozenlib/gapbuf-rs.svg?branch=master)](https://travis-ci.org/frozenlib/gapbuf-rs)
 
 [Documentation](https://docs.frozenlib.net/gapbuf/gapbuf/)
 
