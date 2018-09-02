@@ -1,7 +1,7 @@
 [package]
 name = "gapbuf"
 version = "0.1.1"
-authors = ["FrozenLib <frozenlib@users.noreply.github.com>"]
+authors = ["FrozenLib"]
 license = "MIT/Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/frozenlib/gapbuf-rs"
