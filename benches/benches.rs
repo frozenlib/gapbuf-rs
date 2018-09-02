@@ -143,7 +143,7 @@ fn iter_gapbuf(b: &mut Bencher) {
 }
 
 #[bench]
-fn iter_gdeque(b: &mut Bencher) {
+fn iter_deque(b: &mut Bencher) {
     let s: VecDeque<_> = (0..100000).collect();
     b.iter(|| {
         let s: usize = s.iter().sum();
