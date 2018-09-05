@@ -576,6 +576,8 @@ impl<T> GapBuffer<T> {
 }
 
 /// A splicing iterator for [`GapBuffer`].
+///
+/// This struct is created by [`GapBuffer::splice`].
 pub struct Splice<'a, T: 'a, I: Iterator<Item = T>> {
     buf: &'a mut GapBuffer<T>,
     idx: usize,
@@ -748,6 +750,8 @@ impl<T> Drop for RawGapBuffer<T> {
 ////////////////////////////////////////////////////////////////////////////////
 
 /// Immutable sub-range of [`GapBuffer`]
+///
+/// This struct is created by [`Slice::range`].
 #[derive(Hash)]
 pub struct Range<'a, T: 'a> {
     s: Slice<T>,
@@ -755,6 +759,8 @@ pub struct Range<'a, T: 'a> {
 }
 
 /// Mutable sub-range of [`GapBuffer`].
+///
+/// This struct is created by [`Slice::range_mut`].
 #[derive(Hash)]
 pub struct RangeMut<'a, T: 'a> {
     s: Slice<T>,
@@ -775,13 +781,25 @@ impl<'a, T: 'a> Range<'a, T> {
         unsafe { Range::new(Slice::empty()) }
     }
 
+    /// Returns a reference to an element at index or None if out of bounds.
+    ///
+    /// Unlike [`Slice::get`], return value not borrow `self`.
     #[inline]
     pub fn get(&self, index: usize) -> Option<&'a T> {
         unsafe { self.s.get_with_lifetime(index) }
     }
+
+    /// Return a immutable sub-range of this Slice.
+    ///
+    /// Unlike [`Slice::range`], return value not borrow `self`.
     pub fn range(&self, range: impl RangeBounds<usize>) -> Range<'a, T> {
         unsafe { self.range_with_lifetime(range) }
     }
+
+    /// Returns a pair of slices.
+    /// First slice is before gap. Second slice is after gap.
+    ///
+    /// Unlike [`Slice::as_slices`], return value not borrow `self`.
     pub fn as_slices(&self) -> (&'a [T], &'a [T]) {
         unsafe { self.as_slices_with_lifetime() }
     }
@@ -1454,6 +1472,8 @@ impl<'a, T> IntoIterator for &'a mut Slice<T> {
 }
 
 /// A draining iterator for [`GapBuffer`].
+///
+/// This struct is created by [`GapBuffer::drain`].
 pub struct Drain<'a, T: 'a> {
     buf: &'a mut GapBuffer<T>,
     idx: usize,
