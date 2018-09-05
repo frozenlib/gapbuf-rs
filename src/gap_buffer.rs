@@ -775,6 +775,7 @@ impl<'a, T: 'a> Range<'a, T> {
         unsafe { Range::new(Slice::empty()) }
     }
 
+    #[inline]
     pub fn get(&self, index: usize) -> Option<&'a T> {
         unsafe { self.s.get_with_lifetime(index) }
     }
@@ -1096,9 +1097,12 @@ impl<T> Slice<T> {
         self.cap - self.len
     }
 
+    #[inline]
     fn as_ptr(&self) -> *const T {
         self.ptr.as_ptr()
     }
+
+    #[inline]
     fn as_mut_ptr(&mut self) -> *mut T {
         self.ptr.as_ptr()
     }
