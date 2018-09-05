@@ -18,6 +18,7 @@
 //! }
 //!
 //! ```
+#![cfg_attr(feature = "docs-rs", feature(allocator_api))]
 
 #[macro_use]
 mod finally;

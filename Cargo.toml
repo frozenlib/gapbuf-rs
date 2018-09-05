@@ -13,7 +13,13 @@ description = "Generic gap buffer."
 [badges]
 travis-ci = { repository = "frozenlib/gapbuf-rs" }
 
+[features]
+docs-rs = []
+
 [dependencies]
 
 [dev-dependencies]
 proptest = "0.8.6"
+
+[package.metadata.docs.rs]
+features = [ "docs-rs" ]
