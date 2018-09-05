@@ -724,8 +724,7 @@ impl<T> RawGapBuffer<T> {
                         alloc(new_layout)
                     } else {
                         realloc(p, old_layout, new_layout.size())
-                    } as *mut T)
-                        .unwrap_or_else(|| handle_alloc_error(new_layout))
+                    } as *mut T).unwrap_or_else(|| handle_alloc_error(new_layout))
                 };
             }
         }
@@ -866,23 +865,15 @@ impl<T> Slice<T> {
     /// Returns a reference to an element at index or None if out of bounds.
     #[inline]
     pub fn get(&self, index: usize) -> Option<&T> {
-        if self.len <= index {
-            None
-        } else {
-            unsafe { Some(&*self.as_ptr().add(self.get_offset(index))) }
-        }
+        self.get_offset(index)
+            .map(|o| unsafe { &*self.as_ptr().add(o) })
     }
 
     /// Returns a mutable reference to an element at index or None if out of bounds.
     #[inline]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
-        if self.len <= index {
-            None
-        } else {
-            let p = self.as_mut_ptr();
-            let o = self.get_offset(index);
-            unsafe { Some(&mut *p.add(o)) }
-        }
+        self.get_offset(index)
+            .map(|o| unsafe { &mut *self.as_mut_ptr().add(o) })
     }
 
     /// Swaps two elements in the GapBuffer.
@@ -896,8 +887,8 @@ impl<T> Slice<T> {
     /// Panics if `a >= self.len()` or `b >= self.len()`.
     #[inline]
     pub fn swap(&mut self, a: usize, b: usize) {
-        let oa = self.get_offset(a);
-        let ob = self.get_offset(b);
+        let oa = self.get_offset(a).expect("a is out of bounds.");
+        let ob = self.get_offset(b).expect("b is out of bounds.");
         let p = self.as_mut_ptr();
         unsafe { ptr::swap(p.add(oa), p.add(ob)) }
     }
@@ -1073,12 +1064,13 @@ impl<T> Slice<T> {
     }
 
     #[inline]
-    fn get_offset(&self, index: usize) -> usize {
-        assert!(index < self.len);
-        index + if index < self.gap {
-            0
+    fn get_offset(&self, index: usize) -> Option<usize> {
+        if index < self.gap {
+            Some(index)
+        } else if index < self.len {
+            Some(index + self.gap_len())
         } else {
-            self.gap_len()
+            None
         }
     }
 
