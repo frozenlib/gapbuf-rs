@@ -774,6 +774,16 @@ impl<'a, T: 'a> Range<'a, T> {
     pub fn empty() -> Self {
         unsafe { Range::new(Slice::empty()) }
     }
+
+    pub fn get(&self, index: usize) -> Option<&'a T> {
+        unsafe { self.s.get_with_lifetime(index) }
+    }
+    pub fn range(&self, range: impl RangeBounds<usize>) -> Range<'a, T> {
+        unsafe { self.range_with_lifetime(range) }
+    }
+    pub fn as_slices(&self) -> (&'a [T], &'a [T]) {
+        unsafe { self.as_slices_with_lifetime() }
+    }
 }
 impl<'a, T: 'a> RangeMut<'a, T> {
     #[inline]
@@ -865,8 +875,11 @@ impl<T> Slice<T> {
     /// Returns a reference to an element at index or None if out of bounds.
     #[inline]
     pub fn get(&self, index: usize) -> Option<&T> {
-        self.get_offset(index)
-            .map(|o| unsafe { &*self.as_ptr().add(o) })
+        unsafe { self.get_with_lifetime(index) }
+    }
+    #[inline]
+    unsafe fn get_with_lifetime<'a>(&self, index: usize) -> Option<&'a T> {
+        self.get_offset(index).map(|o| &*self.as_ptr().add(o))
     }
 
     /// Returns a mutable reference to an element at index or None if out of bounds.
@@ -913,7 +926,10 @@ impl<T> Slice<T> {
     /// # }
     /// ```
     pub fn range(&self, range: impl RangeBounds<usize>) -> Range<T> {
-        unsafe { Range::new(self.range_slice(range)) }
+        unsafe { self.range_with_lifetime(range) }
+    }
+    unsafe fn range_with_lifetime<'a>(&self, range: impl RangeBounds<usize>) -> Range<'a, T> {
+        Range::new(self.range_slice(range))
     }
 
     /// Return a mutable sub-range of this Slice.
@@ -1010,15 +1026,16 @@ impl<T> Slice<T> {
     /// # }
     /// ```
     pub fn as_slices(&self) -> (&[T], &[T]) {
-        unsafe {
-            let p0 = self.as_ptr();
-            let c1 = self.len - self.gap;
-            let p1 = p0.add(self.cap - c1);
-            (
-                slice::from_raw_parts(p0, self.gap),
-                slice::from_raw_parts(p1, c1),
-            )
-        }
+        unsafe { self.as_slices_with_lifetime() }
+    }
+    unsafe fn as_slices_with_lifetime<'a>(&self) -> (&'a [T], &'a [T]) {
+        let p0 = self.as_ptr();
+        let c1 = self.len - self.gap;
+        let p1 = p0.add(self.cap - c1);
+        (
+            slice::from_raw_parts(p0, self.gap),
+            slice::from_raw_parts(p1, c1),
+        )
     }
 
     /// Returns a pair of slices.
@@ -1197,6 +1214,7 @@ where
         self.deref().fmt(f)
     }
 }
+
 impl<T> Debug for Slice<T>
 where
     T: Debug,
