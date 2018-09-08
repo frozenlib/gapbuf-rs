@@ -277,13 +277,18 @@ impl<T> GapBuffer<T> {
         self.len += 1;
     }
 
+    #[deprecated(note = "insert_iter renamed to insert_many.")]
+    pub fn insert_iter(&mut self, index: usize, iter: impl IntoIterator<Item = T>) {
+        self.insert_many(index, iter);
+    }
+
     /// Inserts multiple elements at position index within the `GapBuffer<T>`.
     ///
     /// # Panics
     /// Panics if `index > len`.
     ///
     /// Panics if the number of elements in the gap buffer overflows a usize.
-    pub fn insert_iter(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
+    pub fn insert_many(&mut self, mut index: usize, iter: impl IntoIterator<Item = T>) {
         assert!(index <= self.len());
         let mut iter = iter.into_iter();
         let min_len = iter.size_hint().0;
@@ -610,7 +615,7 @@ impl<'a, T: 'a, I: Iterator<Item = T>> Iterator for Splice<'a, T, I> {
 impl<'a, T: 'a, I: Iterator<Item = T>> Drop for Splice<'a, T, I> {
     fn drop(&mut self) {
         while self.next().is_some() {}
-        self.buf.insert_iter(self.idx, &mut self.iter);
+        self.buf.insert_many(self.idx, &mut self.iter);
     }
 }
 impl<'a, T: 'a, I: Iterator<Item = T>> ExactSizeIterator for Splice<'a, T, I> {}
@@ -691,7 +696,7 @@ impl<T: Clone> Clone for GapBuffer<T> {
 impl<T> Extend<T> for GapBuffer<T> {
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
         let len = self.len;
-        self.insert_iter(len, iter);
+        self.insert_many(len, iter);
     }
 }
 impl<'a, T: 'a + Copy> Extend<&'a T> for GapBuffer<T> {

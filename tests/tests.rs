@@ -267,28 +267,28 @@ fn insert_each() {
 }
 
 #[test]
-fn insert_iter() {
+fn insert_many() {
     let mut b = gap_buffer![1, 2, 3, 4];
-    b.insert_iter(2, vec![10, 11]);
+    b.insert_many(2, vec![10, 11]);
     assert_eq!(b, [1, 2, 10, 11, 3, 4]);
 }
 
 #[test]
 #[should_panic]
-fn insert_iter_overflow() {
+fn insert_many_overflow() {
     let mut b = gap_buffer![1, 2, 3, 4];
-    b.insert_iter(0, std::iter::repeat(0));
+    b.insert_many(0, std::iter::repeat(0));
 }
 
 #[test]
 #[should_panic]
-fn insert_iter_out_of_range() {
+fn insert_many_out_of_range() {
     let mut buf = gap_buffer![1, 2, 3, 4];
-    buf.insert_iter(5, vec![1, 2]);
+    buf.insert_many(5, vec![1, 2]);
 }
 
 #[test]
-fn insert_iter_each() {
+fn insert_many_each() {
     let e0 = vec![1, 2, 3, 4];
     let b0 = gap_buffer![1, 2, 3, 4];
 
@@ -301,7 +301,7 @@ fn insert_iter_each() {
                 let mut b1 = b0.clone();
                 b1.reserve_exact(r);
                 b1.set_gap(g);
-                b1.insert_iter(i, vec![10, 11]);
+                b1.insert_many(i, vec![10, 11]);
                 assert_eq!(b1, e1);
             }
         }
