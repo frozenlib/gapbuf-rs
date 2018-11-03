@@ -9,6 +9,7 @@ documentation = "https://docs.frozenlib.net/gapbuf/gapbuf/"
 keywords = ["gap", "gapbuffer"]
 categories = ["data-structures"]
 description = "Generic gap buffer."
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "frozenlib/gapbuf-rs" }

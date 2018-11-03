@@ -1,10 +1,10 @@
 #![feature(test)]
 
-extern crate gapbuf;
 extern crate test;
+
+use self::test::Bencher;
 use gapbuf::GapBuffer;
 use std::collections::VecDeque;
-use test::Bencher;
 
 #[bench]
 fn push_back_vec(b: &mut Bencher) {

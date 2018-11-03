@@ -26,4 +26,4 @@ mod finally;
 #[macro_use]
 mod gap_buffer;
 
-pub use gap_buffer::*;
+pub use crate::gap_buffer::*;
