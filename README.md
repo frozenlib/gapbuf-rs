@@ -12,8 +12,7 @@ This type has methods similar to `Vec`.
 ## Examples
 
 ```rust
-#[macro_use]
-extern crate gapbuf;
+use gapbuf::gap_buffer;
 
 fn main() {
     let mut b = gap_buffer![1, 2, 3];
