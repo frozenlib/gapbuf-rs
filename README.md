@@ -4,14 +4,12 @@
 [![Docs.rs](https://docs.rs/gapbuf/badge.svg)](https://docs.rs/crate/gapbuf)
 [![Build Status](https://travis-ci.org/frozenlib/gapbuf-rs.svg?branch=master)](https://travis-ci.org/frozenlib/gapbuf-rs)
 
-[Documentation](https://docs.frozenlib.net/gapbuf/gapbuf/)
-
 Generic gap buffer implementation in Rust.
 
 This crate provides the type `GapBuffer`.
 This type has methods similar to `Vec`.
 
-## Example
+## Examples
 
 ```rust
 #[macro_use]
