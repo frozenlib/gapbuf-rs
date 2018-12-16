@@ -53,6 +53,23 @@
         },
         {
             "type": "shell",
+            "label": "cargo run exmaple",
+            "command": "cargo",
+            "args": [
+                "run",
+                "--example",
+                "${fileBasenameNoExtension}",
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "presentation": {
+                "panel": "dedicated",
+                "clear": true,
+            }
+        },
+        {
+            "type": "shell",
             "label": "cargo doc",
             "command": "cargo",
             "args": [
