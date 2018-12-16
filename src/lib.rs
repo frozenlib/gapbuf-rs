@@ -14,6 +14,8 @@
 //! b.remove(2);
 //! assert_eq!(b, [1, 10, 3]);
 //! ```
+//!
+#![doc(html_root_url = "https://docs.rs/gapbuf/0.1.2")]
 #![cfg_attr(feature = "docs-rs", feature(allocator_api))]
 
 #[macro_use]
