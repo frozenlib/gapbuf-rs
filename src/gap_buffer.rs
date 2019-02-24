@@ -511,8 +511,8 @@ impl<T> GapBuffer<T> {
 
     /// Creates a draining iterator that removes the specified range in the GapBuffer and yields the removed items.
     ///
-    /// Note 1: The element range is removed even if the iterator is only partially consumed or not consumed at all.
-    /// Note 2: It is unspecified how many elements are removed from the GapBuffer if the Drain value is leaked.
+    /// - Note 1: The element range is removed even if the iterator is only partially consumed or not consumed at all.
+    /// - Note 2: It is unspecified how many elements are removed from the GapBuffer if the Drain value is leaked.
     ///
     /// # Panics
     /// Panics if the `range` is out of bounds.
@@ -731,7 +731,8 @@ impl<T> RawGapBuffer<T> {
                         alloc(new_layout)
                     } else {
                         realloc(p, old_layout, new_layout.size())
-                    } as *mut T).unwrap_or_else(|| handle_alloc_error(new_layout))
+                    } as *mut T)
+                    .unwrap_or_else(|| handle_alloc_error(new_layout))
                 };
             }
         }
