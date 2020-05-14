@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "type": "cargo",
+            "type": "shell",
             "label": "cargo build",
             "command": "cargo",
             "args": [
@@ -13,10 +13,6 @@
             "problemMatcher": [
                 "$rustc"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
             "presentation": {
                 "panel": "dedicated",
                 "clear": true,
@@ -28,7 +24,7 @@
             // }
         },
         {
-            "type": "cargo",
+            "type": "shell",
             "label": "cargo test",
             "command": "cargo",
             "args": [
@@ -38,7 +34,7 @@
                 "$rustc"
             ],
             "group": {
-                "kind": "test",
+                "kind": "build",
                 "isDefault": true
             },
             "presentation": {
