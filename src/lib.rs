@@ -16,7 +16,6 @@
 //! ```
 //!
 #![doc(html_root_url = "https://docs.rs/gapbuf/0.1.2")]
-#![cfg_attr(feature = "docs-rs", feature(allocator_api))]
 
 #[macro_use]
 mod finally;
