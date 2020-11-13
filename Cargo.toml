@@ -20,7 +20,8 @@ docs-rs = []
 [dependencies]
 
 [dev-dependencies]
-proptest = "0.8.6"
+test-strategy = "0.1.0"
+proptest = "0.10.1"
 
 [package.metadata.docs.rs]
 features = [ "docs-rs" ]
