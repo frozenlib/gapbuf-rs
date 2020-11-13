@@ -2,6 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/gapbuf.svg)](https://crates.io/crates/gapbuf)
 [![Docs.rs](https://docs.rs/gapbuf/badge.svg)](https://docs.rs/gapbuf)
+[![Actions Status](https://github.com/frozenlib/gapbuf-rs/workflows/CI/badge.svg)](https://github.com/frozenlib/gapbuf-rs/actions)
 [![Build Status](https://travis-ci.org/frozenlib/gapbuf-rs.svg?branch=master)](https://travis-ci.org/frozenlib/gapbuf-rs)
 
 Generic gap buffer implementation in Rust.
