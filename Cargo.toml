@@ -2,7 +2,7 @@
 name = "gapbuf"
 version = "0.1.2"
 authors = ["FrozenLib"]
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/frozenlib/gapbuf-rs"
 documentation = "https://docs.rs/gapbuf/"
