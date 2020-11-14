@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate gapbuf;
-
-use gapbuf::GapBuffer;
+use gapbuf::{gap_buffer, GapBuffer};
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::panic;
