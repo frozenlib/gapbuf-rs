@@ -69,6 +69,7 @@
             "label": "cargo doc",
             "command": "cargo",
             "args": [
+                "+nightly",
                 "doc"
             ],
             "problemMatcher": [
@@ -84,6 +85,7 @@
             "label": "cargo doc open",
             "command": "cargo",
             "args": [
+                "+nightly",
                 "doc",
                 "--open"
             ],
