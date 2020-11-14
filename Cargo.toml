@@ -11,9 +11,6 @@ categories = ["data-structures"]
 description = "Generic gap buffer."
 edition = "2018"
 
-[badges]
-travis-ci = { repository = "frozenlib/gapbuf-rs" }
-
 [features]
 docs-rs = []
 
