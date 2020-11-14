@@ -19,26 +19,22 @@ use std::slice;
 /// - Create a [`GapBuffer`] containing a given list of elements:
 ///
 /// ```
-/// # #[macro_use] extern crate gapbuf;
-/// # fn main() {
-///   let b = gap_buffer![1, 2, 3];
-///   assert_eq!(b.len(), 3);
-///   assert_eq!(b[0], 1);
-///   assert_eq!(b[1], 2);
-///   assert_eq!(b[2], 3);
-/// # }
+/// use gapbuf::gap_buffer;
+/// let b = gap_buffer![1, 2, 3];
+/// assert_eq!(b.len(), 3);
+/// assert_eq!(b[0], 1);
+/// assert_eq!(b[1], 2);
+/// assert_eq!(b[2], 3);
 /// ```
 ///
 /// - Create a [`GapBuffer`] from a given element and size:
 ///
 /// ```
-/// # #[macro_use] extern crate gapbuf;
-/// # fn main() {
-///   let b = gap_buffer!["abc"; 2];
-///   assert_eq!(b.len(), 2);
-///   assert_eq!(b[0], "abc");
-///   assert_eq!(b[1], "abc");
-/// # }
+/// use gapbuf::gap_buffer;
+/// let b = gap_buffer!["abc"; 2];
+/// assert_eq!(b.len(), 2);
+/// assert_eq!(b[0], "abc");
+/// assert_eq!(b[1], "abc");
 /// ```
 ///
 /// [`GapBuffer`]: ../gapbuf/struct.GapBuffer.html
@@ -356,16 +352,13 @@ impl<T> GapBuffer<T> {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate gapbuf;
-    /// # fn main() {
-    /// use gapbuf::GapBuffer;
+    /// use gapbuf::gap_buffer;
     ///
     /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
     /// buf.set_gap(5);
     /// let value = buf.swap_remove(0);
     /// assert_eq!(value, 1);
     /// assert_eq!(buf, [5, 2, 3, 4]);
-    /// # }
     /// ```
     pub fn swap_remove(&mut self, index: usize) -> T {
         assert!(index < self.len());
@@ -400,15 +393,13 @@ impl<T> GapBuffer<T> {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate gapbuf;
-    /// # fn main() {
-    /// use gapbuf::GapBuffer;
+    /// use gapbuf::gap_buffer;
     ///
     /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
     /// let value = buf.remove(0);
     /// assert_eq!(value, 1);
     /// assert_eq!(buf, [2, 3, 4, 5]);
-    /// # }
+    /// ```
     pub fn remove(&mut self, index: usize) -> T {
         assert!(index <= self.len());
         let offset;
@@ -443,13 +434,11 @@ impl<T> GapBuffer<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate gapbuf; fn main() {
-    /// #
+    /// use gapbuf::gap_buffer;
+    ///
     /// let mut buf = gap_buffer![1, 2, 3, 4];
     /// buf.truncate(2);
     /// assert_eq!(buf, [1, 2]);
-    /// #
-    /// # }
     /// ```
     pub fn truncate(&mut self, len: usize) {
         if needs_drop::<T>() {
@@ -472,13 +461,11 @@ impl<T> GapBuffer<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate gapbuf; fn main() {
-    /// #
+    /// use gapbuf::gap_buffer;
+    ///
     /// let mut buf = gap_buffer![1, 2, 3, 4];
     /// buf.retain(|&x| x%2 == 0);
     /// assert_eq!(buf, [2, 4]);
-    /// #
-    /// # }
     /// ```
     pub fn retain(&mut self, mut f: impl FnMut(&T) -> bool) {
         let mut n = 0;
@@ -520,8 +507,8 @@ impl<T> GapBuffer<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate gapbuf; fn main() {
-    /// #
+    /// use gapbuf::gap_buffer;
+    ///
     /// let mut buf = gap_buffer![1, 2, 3, 4];
     ///
     /// let d : Vec<_> = buf.drain(1..3).collect();
@@ -530,8 +517,6 @@ impl<T> GapBuffer<T> {
     ///
     /// buf.drain(..);
     /// assert_eq!(buf.is_empty(), true);
-    /// #
-    /// # }
     /// ```
     pub fn drain(&mut self, range: impl RangeBounds<usize>) -> Drain<T> {
         let (idx, len) = self.to_idx_len(range);
@@ -555,15 +540,13 @@ impl<T> GapBuffer<T> {
     /// # Examples
     ///
     /// ```
-    /// # #[macro_use] extern crate gapbuf; fn main() {
-    /// #
+    /// use gapbuf::gap_buffer;
+    ///
     /// let mut b = gap_buffer![1, 2, 3, 4];
     /// let r : Vec<_> = b.splice(1..3, vec![7, 8, 9]).collect();
     ///
     /// assert_eq!(b, [1, 7, 8, 9, 4]);
     /// assert_eq!(r, [2, 3]);
-    /// #
-    /// # }
     /// ```
     pub fn splice<I: IntoIterator<Item = T>>(
         &mut self,
@@ -938,8 +921,8 @@ impl<T> Slice<T> {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate gapbuf; fn main() {
-    /// #
+    /// use gapbuf::gap_buffer;
+    ///
     /// let buf = gap_buffer![1, 2, 3, 4, 5];
     ///
     /// let r1 = buf.range(1..);
@@ -947,8 +930,6 @@ impl<T> Slice<T> {
     ///
     /// let r2 = r1.range(1..3);
     /// assert_eq!(r2, [3, 4]);
-    /// #
-    /// # }
     /// ```
     pub fn range(&self, range: impl RangeBounds<usize>) -> Range<T> {
         unsafe { self.range_with_lifetime(range) }
@@ -964,8 +945,8 @@ impl<T> Slice<T> {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate gapbuf; fn main() {
-    /// #
+    /// use gapbuf::gap_buffer;
+    ///
     /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
     /// {
     ///     let mut r = buf.range_mut(1..);
@@ -973,8 +954,6 @@ impl<T> Slice<T> {
     ///     r[0] = 0;
     /// }
     /// assert_eq!(buf, [1, 0, 3, 4, 5]);
-    /// #
-    /// # }
     /// ```
     pub fn range_mut(&mut self, range: impl RangeBounds<usize>) -> RangeMut<T> {
         unsafe { RangeMut::new(self.range_slice(range)) }
@@ -1040,15 +1019,13 @@ impl<T> Slice<T> {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate gapbuf; fn main() {
-    /// #
+    /// use gapbuf::gap_buffer;
+    ///
     /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
     /// buf.set_gap(2);
     /// let (s1, s2) = buf.as_slices();
     /// assert_eq!(s1, [1, 2]);
     /// assert_eq!(s2, [3, 4, 5]);
-    /// #
-    /// # }
     /// ```
     pub fn as_slices(&self) -> (&[T], &[T]) {
         unsafe { self.as_slices_with_lifetime() }
@@ -1068,8 +1045,8 @@ impl<T> Slice<T> {
     ///
     /// # Examples
     /// ```
-    /// # #[macro_use] extern crate gapbuf; fn main() {
-    /// #
+    /// use gapbuf::gap_buffer;
+    ///
     /// let mut buf = gap_buffer![1, 2, 3, 4, 5];
     /// buf.set_gap(2);
     /// {
@@ -1078,8 +1055,6 @@ impl<T> Slice<T> {
     ///     s2[0] = 11;
     /// }
     /// assert_eq!(buf, [10, 2, 11, 4, 5]);
-    /// #
-    /// # }
     /// ```
     pub fn as_mut_slices(&mut self) -> (&mut [T], &mut [T]) {
         unsafe {
