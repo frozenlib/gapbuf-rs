@@ -13,7 +13,7 @@ use std::slice;
 
 /// Creates a [`GapBuffer`] containing the arguments.
 ///
-/// `gap_buffer!` allows [`GapBuffer`] to be defined with the same syntax as `vec!`.
+/// `gap_buffer!` allows [`GapBuffer`] to be defined with the same syntax as [`vec!`](std::vec!).
 /// There are two forms of this macro:
 ///
 /// - Create a [`GapBuffer`] containing a given list of elements:
@@ -65,7 +65,7 @@ macro_rules! gap_buffer {
 
 /// Dynamic array that allows efficient insertion and deletion operations clustered near the same location.
 ///
-/// `GapBuffer<T>` has methods similar to `Vec`.
+/// `GapBuffer<T>` has methods similar to [`Vec`](std::vec::Vec).
 #[derive(Hash)]
 pub struct GapBuffer<T>(RawGapBuffer<T>);
 
