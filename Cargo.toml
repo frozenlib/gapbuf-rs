@@ -19,7 +19,7 @@ docs-rs = []
 [dev-dependencies]
 test-strategy = "0.1.1"
 proptest = "0.10.1"
-rand = "0.7.3"
+getrandom = "0.1.15"
 
 [package.metadata.docs.rs]
 features = [ "docs-rs" ]
