@@ -48,8 +48,7 @@ fn range(
     #[strategy(0..=#len)] begin: usize,
     #[strategy(#begin..=#len)] end: usize,
 ) {
-    let b: GapBuffer<_> = (0..len).collect();
-    let mut b = b.clone();
+    let mut b: GapBuffer<_> = (0..len).collect();
     b.reserve_exact(reserve);
     b.set_gap(gap);
 

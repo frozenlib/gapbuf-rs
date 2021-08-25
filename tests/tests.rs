@@ -8,7 +8,7 @@ use std::panic::AssertUnwindSafe;
 fn new() {
     let buf = GapBuffer::<u32>::new();
 
-    assert_eq!(buf.is_empty(), true);
+    assert!(buf.is_empty());
     assert_eq!(buf.len(), 0);
     assert_eq!(buf.gap(), 0);
     assert_eq!(buf.capacity(), 0);
@@ -17,7 +17,7 @@ fn new() {
 fn with_capacity() {
     let buf = GapBuffer::<u32>::with_capacity(10);
 
-    assert_eq!(buf.is_empty(), true);
+    assert!(buf.is_empty());
     assert_eq!(buf.len(), 0);
     assert_eq!(buf.gap(), 0);
     assert!(buf.capacity() >= 10);
@@ -430,7 +430,7 @@ fn swap_remove() {
                 b1.swap_remove(i);
 
                 let mut b1: Vec<_> = b1.into_iter().collect();
-                b1.sort();
+                b1.sort_unstable();
                 assert_eq!(b1, e1);
             }
         }
@@ -462,7 +462,7 @@ fn clear() {
             b.reserve_exact(r);
             b.set_gap(g);
             b.clear();
-            assert_eq!(b.is_empty(), true);
+            assert!(b.is_empty());
         }
     }
 }
@@ -553,7 +553,7 @@ fn drain() {
         assert_eq!(b, [1, 4]);
 
         b.drain(..);
-        assert_eq!(b.is_empty(), true);
+        assert!(b.is_empty());
     }
 }
 
@@ -598,11 +598,7 @@ impl<'a> TestDrop<'a> {
         name: &'a str,
         is_panic: bool,
     ) -> TestDrop<'a> {
-        TestDrop {
-            t: t,
-            name: name,
-            is_panic: is_panic,
-        }
+        TestDrop { t, name, is_panic }
     }
 }
 
@@ -775,6 +771,7 @@ fn range() {
 }
 #[test]
 #[should_panic]
+#[allow(clippy::reversed_empty_ranges)]
 fn range_bad() {
     let b = gap_buffer![1, 2];
     b.range(2..1);
@@ -808,7 +805,7 @@ fn index() {
 fn index_out_of_range() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
-    buf[4];
+    let _ = buf[4];
 }
 
 #[test]
@@ -872,6 +869,7 @@ fn from_iter() {
 }
 
 #[test]
+#[allow(clippy::unit_cmp)]
 fn zero_sized_type() {
     let mut buf = GapBuffer::new();
     buf.push_back(());

@@ -371,14 +371,13 @@ impl<T> GapBuffer<T> {
                 value = pt.read();
                 self.gap -= 1;
                 copy(p.add(self.gap), pt, 1);
-                self.len -= 1;
             } else {
                 let gap_len = self.gap_len();
                 let pt = p.add(index + gap_len);
                 value = pt.read();
                 copy(p.add(self.gap + gap_len), pt, 1);
-                self.len -= 1;
             }
+            self.len -= 1;
             value
         }
     }
