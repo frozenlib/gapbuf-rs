@@ -188,7 +188,7 @@ fn set_gap_each() {
 }
 
 #[test]
-fn isnert_before_gap() {
+fn insert_before_gap() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
     buf.set_gap(3);
@@ -198,7 +198,7 @@ fn isnert_before_gap() {
 }
 
 #[test]
-fn isnert_before_gap_near() {
+fn insert_before_gap_near() {
     let mut buf = gap_buffer![1, 2, 3, 4];
     buf.reserve(10);
     buf.set_gap(3);
@@ -837,7 +837,7 @@ fn covariant() {
     b.push_back("aaa");
     let s = String::from("bbb");
 
-    // `&GapBuffer<&static str>` can conert `&GapBuffer<&a>`
+    // `&GapBuffer<&static str>` can convert `&GapBuffer<&a>`
     fn c_gapbuf<'a>(_buf: &GapBuffer<&'a str>, _s: &'a str) {}
     c_gapbuf(&b, &s);
 
@@ -849,11 +849,11 @@ fn covariant() {
     // fn c_range_mut<'a, 'b>(_buf: gapbuf::RangeMut<'b, &'a str>, _s: &'a str) {}
     // c_range_mut(b.range_mut(0..1), &s);
 
-    // `&Slice<&static str>` can conert `&Slice<&a>`
+    // `&Slice<&static str>` can convert `&Slice<&a>`
     fn c_slice<'a>(_buf: &gapbuf::Slice<&'a str>, _s: &'a str) {}
     c_slice(&b, &s);
 
-    // `&mut Slice<&static str>` can not conert `&mut Slice<&a>`
+    // `&mut Slice<&static str>` can not convert `&mut Slice<&a>`
     // fn c_mut_slice<'a>(_buf: &mut gapbuf::Slice<&'a str>, _s: &'a str) {}
     // c_mut_slice(&mut b, &s);
 }
