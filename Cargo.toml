@@ -9,7 +9,7 @@ documentation = "https://docs.rs/gapbuf/"
 keywords = ["gap", "gapbuffer"]
 categories = ["data-structures"]
 description = "Generic gap buffer."
-edition = "2018"
+edition = "2021"
 
 [features]
 docs-rs = []
@@ -22,4 +22,4 @@ proptest = "1.0.0"
 getrandom = "0.2.3"
 
 [package.metadata.docs.rs]
-features = [ "docs-rs" ]
+features = ["docs-rs"]
