@@ -1,14 +1,12 @@
-use std::alloc::*;
-use std::cmp::*;
+use std::alloc::{alloc, dealloc, handle_alloc_error, realloc, Layout};
+use std::cmp::{max, Ordering};
 use std::fmt::{Debug, Error, Formatter};
-use std::hash::*;
-use std::iter::*;
+use std::hash::{Hash, Hasher};
+use std::iter::{Chain, Fuse, FusedIterator};
 use std::marker::PhantomData;
-use std::mem;
-use std::mem::*;
+use std::mem::{self, align_of, needs_drop, size_of};
 use std::ops::{Deref, DerefMut, Drop, FnMut, Index, IndexMut, RangeBounds};
-use std::ptr;
-use std::ptr::*;
+use std::ptr::{self, copy, drop_in_place, write, NonNull};
 use std::slice;
 
 /// Creates a [`GapBuffer`] containing the arguments.
