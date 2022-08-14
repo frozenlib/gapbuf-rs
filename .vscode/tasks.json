@@ -132,5 +132,27 @@
                 "clear": true
             }
         },
+        {
+            "type": "shell",
+            "label": "cargo bench",
+            "command": "cargo",
+            "args": [
+                "bench"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/benchmarks"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "presentation": {
+                "panel": "dedicated",
+                "clear": true
+            }
+        },
     ]
 }
