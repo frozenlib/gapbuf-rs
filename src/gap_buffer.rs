@@ -992,7 +992,7 @@ impl<T> Slice<T> {
             Unbounded => 0,
         };
         if idx > len {
-            panic!("index {} out of range for slice of length {}", idx, len);
+            panic!("index {idx} out of range for slice of length {len}");
         }
 
         let end = match range.end_bound() {
@@ -1002,11 +1002,11 @@ impl<T> Slice<T> {
             Unbounded => len,
         };
         if end > len {
-            panic!("index {} out of range for slice of length {}", end, len);
+            panic!("index {end} out of range for slice of length {len}");
         }
 
         if end < idx {
-            panic!("slice index starts at {} but ends at {}", idx, end);
+            panic!("slice index starts at {idx} but ends at {len}");
         }
         (idx, end - idx)
     }

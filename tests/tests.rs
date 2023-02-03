@@ -483,7 +483,7 @@ fn truncate_t_is_not_copy() {
                     b.set_gap(g);
                     b.truncate(t);
                     e.truncate(t);
-                    assert_eq!(b, e, "l = {}, t = {}, r = {}, g = {}", l, t, r, g);
+                    assert_eq!(b, e, "l = {l}, t = {t}, r = {r}, g = {g}");
                 }
             }
         }
@@ -506,7 +506,7 @@ fn truncate_t_is_copy() {
                     b.set_gap(g);
                     b.truncate(t);
                     e.truncate(t);
-                    assert_eq!(b, e, "l = {}, t = {}, r = {}, g = {}", l, t, r, g);
+                    assert_eq!(b, e, "l = {l}, t = {t}, r = {r}, g = {g}");
                 }
             }
         }
@@ -842,7 +842,7 @@ fn covariant() {
     c_gapbuf(&b, &s);
 
     // `Range<'b, &'static str>` can convert  `Range<'b, &'a str>`
-    fn c_range<'a, 'b>(_buf: gapbuf::Range<'b, &'a str>, _s: &'a str) {}
+    fn c_range<'a>(_buf: gapbuf::Range<&'a str>, _s: &'a str) {}
     c_range(b.range(0..1), &s);
 
     // `Range<'b, &'static str>` can not convert  `Range<'b, &'a str>`
