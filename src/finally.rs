@@ -6,8 +6,7 @@ impl<F: FnOnce()> DropFn<F> {
 }
 impl<F: FnOnce()> Drop for DropFn<F> {
     fn drop(&mut self) {
-        use std::mem;
-        if let Some(f) = mem::replace(&mut self.0, None) {
+        if let Some(f) = self.0.take() {
             f();
         }
     }
