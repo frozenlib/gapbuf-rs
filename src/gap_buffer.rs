@@ -757,7 +757,7 @@ impl<'a, T: 'a> Range<'a, T> {
     unsafe fn new(s: Slice<T>) -> Self {
         Range {
             s,
-            _phantom: PhantomData::default(),
+            _phantom: PhantomData,
         }
     }
 
@@ -795,7 +795,7 @@ impl<'a, T: 'a> RangeMut<'a, T> {
     unsafe fn new(s: Slice<T>) -> Self {
         RangeMut {
             s,
-            _phantom: PhantomData::default(),
+            _phantom: PhantomData,
         }
     }
 
