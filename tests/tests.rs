@@ -811,7 +811,7 @@ fn index_out_of_range() {
 #[test]
 fn get() {
     let b = gap_buffer![1, 2, 3, 4, 5];
-    let v = vec![1, 2, 3, 4, 5];
+    let v = [1, 2, 3, 4, 5];
     for r in 0..2 {
         for g in 0..5 {
             let mut b = b.clone();
