@@ -983,7 +983,7 @@ impl<T> Slice<T> {
     }
     fn to_idx_len(&self, range: impl RangeBounds<usize>) -> (usize, usize) {
         use std::ops::Bound::*;
-        const MAX: usize = usize::max_value();
+        const MAX: usize = usize::MAX;
         let len = self.len;
         let idx = match range.start_bound() {
             Included(&idx) => idx,
