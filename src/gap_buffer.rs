@@ -806,7 +806,7 @@ impl<'a, T: 'a> RangeMut<'a, T> {
     }
 }
 
-impl<'a, T> Deref for Range<'a, T> {
+impl<T> Deref for Range<'_, T> {
     type Target = Slice<T>;
 
     #[inline]
@@ -814,7 +814,7 @@ impl<'a, T> Deref for Range<'a, T> {
         &self.s
     }
 }
-impl<'a, T> Deref for RangeMut<'a, T> {
+impl<T> Deref for RangeMut<'_, T> {
     type Target = Slice<T>;
 
     #[inline]
@@ -823,13 +823,13 @@ impl<'a, T> Deref for RangeMut<'a, T> {
     }
 }
 
-impl<'a, T> DerefMut for RangeMut<'a, T> {
+impl<T> DerefMut for RangeMut<'_, T> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.s
     }
 }
-impl<'a, T> Clone for Range<'a, T> {
+impl<T> Clone for Range<'_, T> {
     fn clone(&self) -> Self {
         unsafe {
             Range::new(Slice {
@@ -1116,13 +1116,13 @@ impl<T> Default for GapBuffer<T> {
         Self::new()
     }
 }
-impl<'a, T> Default for Range<'a, T> {
+impl<T> Default for Range<'_, T> {
     #[inline]
     fn default() -> Self {
         Self::empty()
     }
 }
-impl<'a, T> Default for RangeMut<'a, T> {
+impl<T> Default for RangeMut<'_, T> {
     #[inline]
     fn default() -> Self {
         Self::empty()
@@ -1148,7 +1148,7 @@ impl<T> IndexMut<usize> for GapBuffer<T> {
     }
 }
 
-impl<'a, T> Index<usize> for Range<'a, T> {
+impl<T> Index<usize> for Range<'_, T> {
     type Output = T;
 
     #[inline]
@@ -1156,7 +1156,7 @@ impl<'a, T> Index<usize> for Range<'a, T> {
         self.deref().index(index)
     }
 }
-impl<'a, T> Index<usize> for RangeMut<'a, T> {
+impl<T> Index<usize> for RangeMut<'_, T> {
     type Output = T;
 
     #[inline]
@@ -1164,7 +1164,7 @@ impl<'a, T> Index<usize> for RangeMut<'a, T> {
         self.deref().index(index)
     }
 }
-impl<'a, T> IndexMut<usize> for RangeMut<'a, T> {
+impl<T> IndexMut<usize> for RangeMut<'_, T> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
         self.deref_mut().index_mut(index)
@@ -1198,7 +1198,7 @@ where
         self.deref().fmt(f)
     }
 }
-impl<'a, T> Debug for Range<'a, T>
+impl<T> Debug for Range<'_, T>
 where
     T: Debug,
 {
@@ -1206,7 +1206,7 @@ where
         self.deref().fmt(f)
     }
 }
-impl<'a, T> Debug for RangeMut<'a, T>
+impl<T> Debug for RangeMut<'_, T>
 where
     T: Debug,
 {
@@ -1248,7 +1248,7 @@ where
 }
 impl<T: Eq> Eq for GapBuffer<T> {}
 
-impl<'a, T, S> PartialEq<S> for Range<'a, T>
+impl<T, S> PartialEq<S> for Range<'_, T>
 where
     T: PartialEq,
     S: ?Sized,
@@ -1258,9 +1258,9 @@ where
         self.deref().eq(other)
     }
 }
-impl<'a, T: Eq> Eq for Range<'a, T> {}
+impl<T: Eq> Eq for Range<'_, T> {}
 
-impl<'a, T, S> PartialEq<S> for RangeMut<'a, T>
+impl<T, S> PartialEq<S> for RangeMut<'_, T>
 where
     T: PartialEq,
     S: ?Sized,
@@ -1270,7 +1270,7 @@ where
         self.deref().eq(other)
     }
 }
-impl<'a, T: Eq> Eq for RangeMut<'a, T> {}
+impl<T: Eq> Eq for RangeMut<'_, T> {}
 
 impl<T, S> PartialEq<S> for Slice<T>
 where
@@ -1305,7 +1305,7 @@ impl<T: Ord> Ord for GapBuffer<T> {
     }
 }
 
-impl<'a, T, S> PartialOrd<S> for Range<'a, T>
+impl<T, S> PartialOrd<S> for Range<'_, T>
 where
     T: PartialOrd,
     S: ?Sized,
@@ -1316,13 +1316,13 @@ where
     }
 }
 
-impl<'a, T: Ord> Ord for Range<'a, T> {
+impl<T: Ord> Ord for Range<'_, T> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.deref().cmp(other)
     }
 }
 
-impl<'a, T, S> PartialOrd<S> for RangeMut<'a, T>
+impl<T, S> PartialOrd<S> for RangeMut<'_, T>
 where
     T: PartialOrd,
     S: ?Sized,
@@ -1333,7 +1333,7 @@ where
     }
 }
 
-impl<'a, T: Ord> Ord for RangeMut<'a, T> {
+impl<T: Ord> Ord for RangeMut<'_, T> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.deref().cmp(other)
     }
@@ -1404,14 +1404,14 @@ impl<'a, T> IntoIterator for &'a GapBuffer<T> {
         self.iter()
     }
 }
-impl<'a, 'b, T> IntoIterator for &'a Range<'b, T> {
+impl<'a, T> IntoIterator for &'a Range<'_, T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
     fn into_iter(self) -> Iter<'a, T> {
         self.iter()
     }
 }
-impl<'a, 'b, T> IntoIterator for &'a RangeMut<'b, T> {
+impl<'a, T> IntoIterator for &'a RangeMut<'_, T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
     fn into_iter(self) -> Iter<'a, T> {
@@ -1457,7 +1457,7 @@ pub struct Drain<'a, T: 'a> {
     idx: usize,
     len: usize,
 }
-impl<'a, T> Iterator for Drain<'a, T> {
+impl<T> Iterator for Drain<'_, T> {
     type Item = T;
     fn next(&mut self) -> Option<T> {
         if self.len == 0 {
@@ -1471,12 +1471,12 @@ impl<'a, T> Iterator for Drain<'a, T> {
         (self.len, Some(self.len))
     }
 }
-impl<'a, T> Drop for Drain<'a, T> {
+impl<T> Drop for Drain<'_, T> {
     fn drop(&mut self) {
         let len = self.len;
         self.nth(len);
     }
 }
 
-impl<'a, T> ExactSizeIterator for Drain<'a, T> {}
-impl<'a, T> FusedIterator for Drain<'a, T> {}
+impl<T> ExactSizeIterator for Drain<'_, T> {}
+impl<T> FusedIterator for Drain<'_, T> {}

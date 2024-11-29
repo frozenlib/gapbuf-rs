@@ -602,7 +602,7 @@ impl<'a> TestDrop<'a> {
     }
 }
 
-impl<'a> Drop for TestDrop<'a> {
+impl Drop for TestDrop<'_> {
     fn drop(&mut self) {
         let mut t = self.t.borrow_mut();
         t.insert(self.name);
