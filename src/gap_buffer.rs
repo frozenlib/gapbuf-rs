@@ -85,7 +85,7 @@ impl<T> GapBuffer<T> {
     /// buf.push_back(5);
     /// ```
     #[inline]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         GapBuffer(RawGapBuffer::new())
     }
 
@@ -116,8 +116,8 @@ impl<T> GapBuffer<T> {
     /// assert_eq!(buf.capacity(), 10);
     /// ```
     #[inline]
-    pub fn capacity(&self) -> usize {
-        self.cap
+    pub const fn capacity(&self) -> usize {
+        self.0.0.cap
     }
 
     /// Reserves capacity for at least additional more elements to be inserted in the given `GapBuffer<T>`.
@@ -239,8 +239,8 @@ impl<T> GapBuffer<T> {
 
     /// Return gap offset of the `GapBuffer<T>`.
     #[inline]
-    pub fn gap(&self) -> usize {
-        self.gap
+    pub const fn gap(&self) -> usize {
+        self.0.0.gap
     }
 
     #[inline]
@@ -689,7 +689,7 @@ impl<'a, T: 'a + Copy> Extend<&'a T> for GapBuffer<T> {
 struct RawGapBuffer<T>(Slice<T>);
 
 impl<T> RawGapBuffer<T> {
-    fn new() -> Self {
+    const fn new() -> Self {
         RawGapBuffer(Slice::empty())
     }
 
@@ -718,6 +718,7 @@ impl<T> RawGapBuffer<T> {
         }
         self.0.cap = new_cap;
     }
+    
     fn get_layout(cap: usize) -> Layout {
         let new_size = size_of::<T>()
             .checked_mul(cap)
@@ -754,7 +755,7 @@ pub struct RangeMut<'a, T: 'a> {
 }
 impl<'a, T: 'a> Range<'a, T> {
     #[inline]
-    unsafe fn new(s: Slice<T>) -> Self {
+    const unsafe fn new(s: Slice<T>) -> Self {
         Range {
             s,
             _phantom: PhantomData,
@@ -763,7 +764,7 @@ impl<'a, T: 'a> Range<'a, T> {
 
     /// Construct a new, empty `Range`.
     #[inline]
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         unsafe { Range::new(Slice::empty()) }
     }
 
@@ -792,7 +793,7 @@ impl<'a, T: 'a> Range<'a, T> {
 }
 impl<'a, T: 'a> RangeMut<'a, T> {
     #[inline]
-    unsafe fn new(s: Slice<T>) -> Self {
+    const unsafe fn new(s: Slice<T>) -> Self {
         RangeMut {
             s,
             _phantom: PhantomData,
@@ -801,7 +802,7 @@ impl<'a, T: 'a> RangeMut<'a, T> {
 
     /// Construct a new, empty `RangeMut`.
     #[inline]
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         unsafe { RangeMut::new(Slice::empty()) }
     }
 }
@@ -856,7 +857,7 @@ pub struct Slice<T> {
 }
 impl<T> Slice<T> {
     /// Construct a new, empty `Slice`.
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Slice {
             ptr: NonNull::dangling(),
             cap: 0,
@@ -867,13 +868,13 @@ impl<T> Slice<T> {
 
     /// Returns the number of elements in the GapBuffer.
     #[inline]
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.len
     }
 
     /// Returns true if the GapBuffer contains no elements.
     #[inline]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
@@ -904,7 +905,7 @@ impl<T> Slice<T> {
     /// # Panics
     /// Panics if `a >= self.len()` or `b >= self.len()`.
     #[inline]
-    pub fn swap(&mut self, a: usize, b: usize) {
+    pub const fn swap(&mut self, a: usize, b: usize) {
         let oa = self.get_offset(a).expect("a is out of bounds.");
         let ob = self.get_offset(b).expect("b is out of bounds.");
         let p = self.as_mut_ptr();
@@ -1027,7 +1028,7 @@ impl<T> Slice<T> {
     pub fn as_slices(&self) -> (&[T], &[T]) {
         unsafe { self.as_slices_with_lifetime() }
     }
-    unsafe fn as_slices_with_lifetime<'a>(&self) -> (&'a [T], &'a [T]) {
+    const unsafe fn as_slices_with_lifetime<'a>(&self) -> (&'a [T], &'a [T]) {
         let p0 = self.as_ptr();
         let c1 = self.len - self.gap;
         let p1 = p0.add(self.cap - c1);
@@ -1053,7 +1054,7 @@ impl<T> Slice<T> {
     /// }
     /// assert_eq!(buf, [10, 2, 11, 4, 5]);
     /// ```
-    pub fn as_mut_slices(&mut self) -> (&mut [T], &mut [T]) {
+    pub const fn as_mut_slices(&mut self) -> (&mut [T], &mut [T]) {
         unsafe {
             let p0 = self.as_mut_ptr();
             let c1 = self.len - self.gap;
@@ -1078,7 +1079,7 @@ impl<T> Slice<T> {
     }
 
     #[inline]
-    fn get_offset(&self, index: usize) -> Option<usize> {
+    const fn get_offset(&self, index: usize) -> Option<usize> {
         if index < self.gap {
             Some(index)
         } else if index < self.len {
@@ -1089,17 +1090,17 @@ impl<T> Slice<T> {
     }
 
     #[inline]
-    fn gap_len(&self) -> usize {
+    const fn gap_len(&self) -> usize {
         self.cap - self.len
     }
 
     #[inline]
-    fn as_ptr(&self) -> *const T {
+    const fn as_ptr(&self) -> *const T {
         self.ptr.as_ptr()
     }
 
     #[inline]
-    fn as_mut_ptr(&mut self) -> *mut T {
+    const fn as_mut_ptr(&mut self) -> *mut T {
         self.ptr.as_ptr()
     }
 }
