@@ -515,7 +515,7 @@ impl<T> GapBuffer<T> {
     /// buf.drain(..);
     /// assert_eq!(buf.is_empty(), true);
     /// ```
-    pub fn drain(&mut self, range: impl RangeBounds<usize>) -> Drain<T> {
+    pub fn drain(&mut self, range: impl RangeBounds<usize>) -> Drain<'_, T> {
         let (idx, len) = self.to_idx_len(range);
         Drain {
             buf: self,
@@ -549,7 +549,7 @@ impl<T> GapBuffer<T> {
         &mut self,
         range: impl RangeBounds<usize>,
         replace_with: I,
-    ) -> Splice<T, I::IntoIter> {
+    ) -> Splice<'_, T, I::IntoIter> {
         let (idx, len) = self.to_idx_len(range);
         Splice {
             buf: self,
@@ -928,7 +928,7 @@ impl<T> Slice<T> {
     /// let r2 = r1.range(1..3);
     /// assert_eq!(r2, [3, 4]);
     /// ```
-    pub fn range(&self, range: impl RangeBounds<usize>) -> Range<T> {
+    pub fn range(&self, range: impl RangeBounds<usize>) -> Range<'_, T> {
         unsafe { self.range_with_lifetime(range) }
     }
     unsafe fn range_with_lifetime<'a>(&self, range: impl RangeBounds<usize>) -> Range<'a, T> {
@@ -952,7 +952,7 @@ impl<T> Slice<T> {
     /// }
     /// assert_eq!(buf, [1, 0, 3, 4, 5]);
     /// ```
-    pub fn range_mut(&mut self, range: impl RangeBounds<usize>) -> RangeMut<T> {
+    pub fn range_mut(&mut self, range: impl RangeBounds<usize>) -> RangeMut<'_, T> {
         unsafe { RangeMut::new(self.range_slice(range)) }
     }
     unsafe fn range_slice(&self, range: impl RangeBounds<usize>) -> Slice<T> {
@@ -1066,13 +1066,13 @@ impl<T> Slice<T> {
     }
 
     /// Returns an iterator over the Slice.
-    pub fn iter(&self) -> Iter<T> {
+    pub fn iter(&self) -> Iter<'_, T> {
         let (s0, s1) = self.as_slices();
         s0.iter().chain(s1.iter())
     }
 
     /// Returns an iterator that allows modifying each value.
-    pub fn iter_mut(&mut self) -> IterMut<T> {
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
         let (s0, s1) = self.as_mut_slices();
         s0.iter_mut().chain(s1.iter_mut())
     }
