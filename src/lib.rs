@@ -1,10 +1,10 @@
-//! `gapbuf` provides the type [`GapBuffer`].
+//! `gap_buf` provides the type [`GapBuffer`].
 //! `GapBuffer` has methods similar to [`Vec`](std::vec::Vec).
 //!
 //! # Examples
 //!
 //! ```
-//! use gapbuf::gap_buffer;
+//! use gap_buf::gap_buffer;
 //!
 //! let mut b = gap_buffer![1, 2, 3];
 //!
@@ -15,7 +15,7 @@
 //! assert_eq!(b, [1, 10, 3]);
 //! ```
 //!
-#![doc(html_root_url = "https://docs.rs/gapbuf/0.1.2")]
+#![doc(html_root_url = "https://docs.rs/gap_buf/0.1.2")]
 
 #[macro_use]
 mod finally;

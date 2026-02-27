@@ -3,7 +3,7 @@
 extern crate test;
 
 use self::test::Bencher;
-use gapbuf::GapBuffer;
+use gap_buf::GapBuffer;
 use std::collections::VecDeque;
 
 #[bench]

@@ -1,8 +1,8 @@
-# gapbuf-rs
+# gap-buf-rs
 
-[![Crates.io](https://img.shields.io/crates/v/gapbuf.svg)](https://crates.io/crates/gapbuf)
-[![Docs.rs](https://docs.rs/gapbuf/badge.svg)](https://docs.rs/gapbuf)
-[![Actions Status](https://github.com/frozenlib/gapbuf-rs/workflows/CI/badge.svg)](https://github.com/frozenlib/gapbuf-rs/actions)
+[![Crates.io](https://img.shields.io/crates/v/gap-buf.svg)](https://crates.io/crates/gap-buf)
+[![Docs.rs](https://docs.rs/gapbuf/badge.svg)](https://docs.rs/gap-buf)
+[![Actions Status](https://github.com/AhoyISki/gap-buf-rs/workflows/CI/badge.svg)](https://github.com/AhoyISki/gap-buf-rs/actions)
 
 Generic gap buffer implementation in Rust.
 
@@ -12,7 +12,7 @@ This type has methods similar to `Vec`.
 ## Examples
 
 ```rust
-use gapbuf::gap_buffer;
+use gap_buf::gap_buffer;
 
 let mut b = gap_buffer![1, 2, 3];
 b.insert(1, 10);

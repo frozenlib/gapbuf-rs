@@ -1,4 +1,4 @@
-use gapbuf::{gap_buffer, GapBuffer};
+use gap_buf::{gap_buffer, GapBuffer};
 use std::cell::RefCell;
 use std::collections::HashSet;
 use std::panic;
@@ -700,7 +700,7 @@ fn eq_slice2() {
 }
 
 #[test]
-fn eq_gapbuf1() {
+fn eq_gap_buf1() {
     let mut buf = GapBuffer::new();
     buf.push_back(1);
 
@@ -708,7 +708,7 @@ fn eq_gapbuf1() {
 }
 
 #[test]
-fn eq_gapbuf2() {
+fn eq_gap_buf2() {
     let mut buf = GapBuffer::new();
     buf.push_back(2);
     buf.push_back(8);
@@ -838,23 +838,23 @@ fn covariant() {
     let s = String::from("bbb");
 
     // `&GapBuffer<&static str>` can convert `&GapBuffer<&a>`
-    fn c_gapbuf<'a>(_buf: &GapBuffer<&'a str>, _s: &'a str) {}
-    c_gapbuf(&b, &s);
+    fn c_gap_buf<'a>(_buf: &GapBuffer<&'a str>, _s: &'a str) {}
+    c_gap_buf(&b, &s);
 
     // `Range<'b, &'static str>` can convert  `Range<'b, &'a str>`
-    fn c_range<'a>(_buf: gapbuf::Range<&'a str>, _s: &'a str) {}
+    fn c_range<'a>(_buf: gap_buf::Range<&'a str>, _s: &'a str) {}
     c_range(b.range(0..1), &s);
 
     // `Range<'b, &'static str>` can not convert  `Range<'b, &'a str>`
-    // fn c_range_mut<'a, 'b>(_buf: gapbuf::RangeMut<'b, &'a str>, _s: &'a str) {}
+    // fn c_range_mut<'a, 'b>(_buf: gap_buf::RangeMut<'b, &'a str>, _s: &'a str) {}
     // c_range_mut(b.range_mut(0..1), &s);
 
     // `&Slice<&static str>` can convert `&Slice<&a>`
-    fn c_slice<'a>(_buf: &gapbuf::Slice<&'a str>, _s: &'a str) {}
+    fn c_slice<'a>(_buf: &gap_buf::Slice<&'a str>, _s: &'a str) {}
     c_slice(&b, &s);
 
     // `&mut Slice<&static str>` can not convert `&mut Slice<&a>`
-    // fn c_mut_slice<'a>(_buf: &mut gapbuf::Slice<&'a str>, _s: &'a str) {}
+    // fn c_mut_slice<'a>(_buf: &mut gap_buf::Slice<&'a str>, _s: &'a str) {}
     // c_mut_slice(&mut b, &s);
 }
 

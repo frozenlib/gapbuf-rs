@@ -1,24 +1,27 @@
 [package]
-name = "gapbuf"
-version = "0.1.4"
-authors = ["FrozenLib"]
+name = "gap-buf"
+version = "0.5.0"
+authors = ["FrozenLib", "AhoyISki"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/frozenlib/gapbuf-rs"
-documentation = "https://docs.rs/gapbuf/"
+repository = "https://github.com/AhoyISki/gap-buf-rs"
+documentation = "https://docs.rs/gap-buf/"
 keywords = ["gap", "gapbuffer"]
 categories = ["data-structures"]
 description = "Generic gap buffer."
-edition = "2021"
-
-[features]
-docs-rs = []
+edition = "2024"
 
 [dependencies]
+bincode = { version = "2.0.1", optional = true }
+unty = { version = "0.0.5", optional = true }
 
 [dev-dependencies]
 test-strategy = "0.2.0"
 proptest = "1.0.0"
+
+[features]
+docs-rs = []
+bincode = ["dep:bincode", "dep:unty"]
 
 [package.metadata.docs.rs]
 features = ["docs-rs"]

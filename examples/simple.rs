@@ -1,4 +1,4 @@
-use gapbuf::gap_buffer;
+use gap_buf::gap_buffer;
 
 fn main() {
     let mut b = gap_buffer![1, 2, 3];

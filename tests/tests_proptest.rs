@@ -1,4 +1,4 @@
-use gapbuf::GapBuffer;
+use gap_buf::GapBuffer;
 use proptest::{collection::vec, prelude::*};
 use test_strategy::{proptest, Arbitrary};
 
