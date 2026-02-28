@@ -1,5 +1,5 @@
 //! `gapbuf` provides the type [`GapBuffer`].
-//! `GapBuffer` has methods similar to [`Vec`](std::vec::Vec).
+//! `GapBuffer` has methods similar to [`Vec`].
 //!
 //! # Examples
 //!
