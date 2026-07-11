@@ -3,18 +3,17 @@ name: CI
 on:
   push:
   pull_request:
-  schedule: [cron: "20 5 * * *"]
+  schedule: [cron: "20 10 * * *"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Rustup update stable
-        run: rustup update stable
-      - name: Show cargo version
-        run: cargo --version
+      - uses: actions/checkout@v7
+      - run: rustup update stable
+      - run: rustup component add clippy
+      - run: cargo --version
       - name: Build
         run: cargo build --verbose
       - name: Build tests
@@ -28,10 +27,22 @@ jobs:
         env:
           RUSTFLAGS: -D warnings
       - name: Rustup toolchain install nightly
-        run: rustup toolchain install nightly
+        run: rustup toolchain install nightly --allow-downgrade --profile minimal
       - name: Set minimal versions
-        run: cargo +nightly update -Z minimal-versions
+        run: cargo +nightly update -Z direct-minimal-versions
       - name: Build tests (minimal versions)
-        run: cargo +stable test --verbose --no-run
+        run: cargo test --verbose --no-run
       - name: Run tests (minimal versions)
-        run: cargo +stable test --verbose
+        run: cargo test --verbose
+      # - uses: taiki-e/install-action@cargo-hack
+      # - name: Check msrv
+      #   run: cargo hack build --rust-version --workspace --ignore-private
+
+      - name: Doc (without docs feature)
+        run: cargo doc --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+      # - name: Doc (with docs feature)
+      #   run: cargo +nightly doc --no-deps --features docs
+      #   env:
+      #     RUSTDOCFLAGS: -D warnings     
