@@ -159,7 +159,7 @@ fn set_gap_many() {
         let gap = *n;
         gaps.push(gap);
         buf.set_gap(gap);
-        assert_eq!(buf.gap(), gap, "gaps: {:?}", &gaps);
+        assert_eq!(buf.gap(), gap, "gaps: {:?}", gaps);
         assert_eq!(buf, [1, 2, 3, 4]);
     }
 }
