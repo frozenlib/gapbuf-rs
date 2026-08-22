@@ -399,15 +399,15 @@ impl<T> GapBuffer<T> {
     /// ```
     pub fn remove(&mut self, index: usize) -> T {
         assert!(index <= self.len());
-        let offset;
-        if self.gap() <= index {
+
+        let offset = if self.gap() <= index {
             self.set_gap(index);
-            offset = self.cap - self.len() + index;
+            self.cap - self.len() + index
         } else {
             self.set_gap(index + 1);
             self.gap = index;
-            offset = index;
-        }
+            index
+        };
         self.len -= 1;
         if self.len == 0 {
             self.gap = 0
